@@ -1,28 +1,26 @@
 import pygame
 
-# Função base: Rasterização de blocos usando SetPixel puro
 def set_pixel_bloco(superficie, x, y, largura, altura, cor):
     largura_tela, altura_tela = superficie.get_size()
     for i in range(int(x), int(x + largura)):
         for j in range(int(y), int(y + altura)):
-            # Clipping: Garante que não desenhe fora da matriz da tela
             if 0 <= i < largura_tela and 0 <= j < altura_tela:
                 superficie.set_at((i, j), cor)
 
 def desenhar_boneca(tela, x, y, e, cores, estado):
     """
-    x, y: Coordenadas de Translação
-    e: Fator de Escala
-    cores: Dicionário com a paleta RGB
-    estado: Dicionário com os frames de animação
+    tela: tela no Pygame onde a boneca vai ficar
+    x, y: Coordenadas na tela
+    e: Tamanhoo das partes da boneca
+    cores[cor]: Dicionário da cor
     """
-    # ROSTO (Base e Sombras)
+    # ROSTO
     set_pixel_bloco(tela, x - 5*e, y - 14*e, 10*e, 8*e, cores['PELE'])
     set_pixel_bloco(tela, x - 5*e, y - 7*e, 10*e, 1*e, cores['PELE_SOMBRA'])
     set_pixel_bloco(tela, x - 5*e, y - 11*e, 1*e, 5*e, cores['PELE_SOMBRA'])
     set_pixel_bloco(tela, x + 4*e, y - 11*e, 1*e, 5*e, cores['PELE_SOMBRA'])
 
-    # OLHOS (Lógica de Piscar e Pupila Móvel)
+    # OLHOS (Piscar e Girando os Olhos)
     if estado['piscando']:
         set_pixel_bloco(tela, x - 3*e, y - 11*e, 2*e, 1*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 1*e, y - 11*e, 2*e, 1*e, cores['PELE_SOMBRA'])
@@ -50,7 +48,7 @@ def desenhar_boneca(tela, x, y, e, cores, estado):
     set_pixel_bloco(tela, x - 4*e, y + 3*e, 3*e, 2*e, cores['ROSA'])
     set_pixel_bloco(tela, x + 1*e, y + 3*e, 3*e, 2*e, cores['ROSA'])
 
-    # PERNAS (Alternância de frames)
+    # PERNINHAS (Andando e tal) 
     if estado['passo'] == 0:
         set_pixel_bloco(tela, x - 4*e, y + 5*e, 3*e, 2*e, cores['PELE'])
         set_pixel_bloco(tela, x + 1*e, y + 5*e, 3*e, 2*e, cores['PELE'])
@@ -58,7 +56,7 @@ def desenhar_boneca(tela, x, y, e, cores, estado):
         set_pixel_bloco(tela, x - 4*e, y + 4*e, 3*e, 2*e, cores['PELE']) 
         set_pixel_bloco(tela, x + 1*e, y + 5*e, 3*e, 2*e, cores['PELE'])
 
-    # BRAÇOS
+    # BRACINHOS
     offset = (1*e) if estado['passo'] == 1 else 0
     set_pixel_bloco(tela, x - 5*e, y - 3*e + offset, 1*e, 5*e, cores['PELE'])
     set_pixel_bloco(tela, x + 4*e, y - 3*e - offset, 1*e, 5*e, cores['PELE'])
