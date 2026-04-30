@@ -6,12 +6,12 @@ from casa import desenhar_casa
 
 pygame.init()
 
-LARGURA, ALTURA = 1500, 1000
+LARGURA, ALTURA = 1000, 500
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 
 fundo = pygame.image.load('./fundo3.png').convert()
 
-x_c, y_c = 400, 600
+x_c, y_c = 400, 300
 escala = 4
 
 clock = pygame.time.Clock()
