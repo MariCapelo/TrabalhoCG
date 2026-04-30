@@ -5,7 +5,7 @@ from transformacoes import (identidade, translacao, multiplica_matrizes, aplicar
 
 pygame.init()
 
-LARGURA, ALTURA = 700, 700
+LARGURA, ALTURA = 1000, 500
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 
 cores_paleta = {
@@ -21,11 +21,14 @@ cores_paleta = {
 }
 
 x_c, y_c = 350, 350
-escala = 8
+escala = 4
 
 clock = pygame.time.Clock()
 contador_anim = 0
 timer_pisca = 0
+alternar = 0 
+
+image = pygame.image.load('./fundo3.png').convert()
 
 status = {
     'passo': 0,
@@ -46,40 +49,36 @@ while True:
 
     m = identidade()
 
-    if teclas[pygame.K_LEFT]:
-        m = multiplica_matrizes(translacao(-5, 0), m)
+    if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
+        m = multiplica_matrizes(translacao(-3, 0), m)
         movendo = True
         status['olhar'] = -1
 
-    if teclas[pygame.K_RIGHT]:
-        m = multiplica_matrizes(translacao(5, 0), m)
+    if teclas[pygame.K_RIGHT] or teclas[pygame.K_d]:
+        m = multiplica_matrizes(translacao(3, 0), m)
         movendo = True
         status['olhar'] = 1
 
-    if teclas[pygame.K_UP]:
-        m = multiplica_matrizes(translacao(0, -5), m)
+    if teclas[pygame.K_UP] or teclas[pygame.K_w]:
+        m = multiplica_matrizes(translacao(0, -3), m)
         movendo = True
 
-    if teclas[pygame.K_DOWN]:
-        m = multiplica_matrizes(translacao(0, 5), m)
+    if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
+        m = multiplica_matrizes(translacao(0, 3), m)
         movendo = True
 
     x_c, y_c = aplicar_transformacao(m, x_c, y_c)
-
-    if teclas[pygame.K_p]:
-        escala += 1
-
-    if teclas[pygame.K_m] and escala > 2:
-        escala -= 1
 
     if movendo:
         contador_anim += 1
 
         if contador_anim > 10:
-            status['passo'] = 1 - status['passo']
+            status['passo'] = 1
+            alternar += 1
             contador_anim = 0
     else:
         status['passo'] = 0
+        alternar = 0
 
     timer_pisca += 1
 
@@ -91,6 +90,7 @@ while True:
             timer_pisca = 0
 
     tela.fill(cores_paleta['FUNDO'])
+    tela.blit(image, (0, 0))
 
     desenhar_boneca(
         tela,
@@ -98,7 +98,8 @@ while True:
         y_c,
         escala,
         cores_paleta,
-        status
+        status,
+        alternar
     )
 
     pygame.display.flip()
