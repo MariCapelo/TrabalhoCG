@@ -2,7 +2,7 @@ import pygame
 from renderizacao import desenhar_poligono, scanline, bresenham
 
 def desenhar_casa(tela):
-    base_x, base_y = 50, 850
+    base_x, base_y = 50, 100
 
     # PAREDES
     casa = [
