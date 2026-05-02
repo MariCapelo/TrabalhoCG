@@ -13,7 +13,6 @@ fundo = pygame.image.load('./fundo3.png').convert()
 
 x_c, y_c = 400, 300
 escala = 4
-
 clock = pygame.time.Clock()
 
 status = {'passo': 0, 'piscando': False, 'olhar': 0}
@@ -21,6 +20,54 @@ status = {'passo': 0, 'piscando': False, 'olhar': 0}
 contador_anim = 0
 timer_pisca = 0
 alternar = 0 
+
+def colisao_boneca(x,y,escala):
+    esquerda= int(x - 8 * escala)
+    direita= int(x + 8 * escala)
+    topo= int(y - 18 * escala)
+    baixo= int(y + 7 * escala)
+    return esquerda, direita, topo, baixo
+
+def colisao_casa_retangulo(x,y):
+    casa_esquerda = 50
+    casa_direita = 310
+    casa_topo = 100
+    casa_baixo = 150
+    return casa_esquerda <= x <= casa_direita and casa_topo <= y <= casa_baixo
+
+
+def colisao_casa_triangulo(x,y):
+   # telhado = [
+    #(base_x-20, base_y) = (30,100)
+    #(base_x+280, base_y),  = (330,100)    
+    #(base_x+130, base_y-80)  = (180,20)
+
+    xa, ya = 30, 100
+    xb, yb = 330, 100
+    xc, yc = 180, 20
+
+    denominador = ((yb - yc) * (xa - xc) + (xc - xb) * (ya - yc))
+    if denominador == 0:
+        return False
+    
+    #P = a + b + c= 1
+    a = ((yb - yc) * (x - xc) + (xc - xb) * (y - yc)) / denominador
+    b = ((yc - ya) * (x - xc) + (xa - xc) * (y - yc)) / denominador
+    c = 1 - a - b
+    return 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1
+
+
+
+def colisao_casa(x,y,escala):
+    esquerda, direita, topo, baixo = colisao_boneca(x,y,escala)
+    pontos_de_colisao=[(esquerda, topo), (direita, topo), (esquerda, baixo), (direita, baixo)]
+
+    for px,py in pontos_de_colisao:
+        if colisao_casa_retangulo(px,py) or colisao_casa_triangulo(px,py):
+            return True
+
+    return False
+
 
 while True:
     for event in pygame.event.get():
@@ -53,7 +100,10 @@ while True:
         m = multiplica_matrizes(translacao(0, 3), m)
         movendo = True
 
-    x_c, y_c = aplicar_transformacao(m, x_c, y_c)
+#verificar se tem colisão antes de atualizar a posição da boneca
+    novo_x, novo_y = aplicar_transformacao(m, x_c, y_c)
+    if not colisao_casa(novo_x, novo_y, escala):
+        x_c, y_c = novo_x, novo_y
 
     if movendo:
         contador_anim += 1
