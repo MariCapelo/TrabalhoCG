@@ -3,6 +3,8 @@ import sys
 from bonequinha import desenhar_boneca
 from transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from casa import desenhar_casa
+from relogio import desenhar_modal, desenhar_relogio, desenhar_texto, desenhar_fundo_relogio
+from renderizacao import setPixel
 
 pygame.init()
 
@@ -21,12 +23,19 @@ status = {'passo': 0, 'piscando': False, 'olhar': 0}
 contador_anim = 0
 timer_pisca = 0
 alternar = 0 
+tempo_total = 60  
+tempo_inicial = pygame.time.get_ticks()
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+    tempo_atual = pygame.time.get_ticks()
+    tempo_passado = (tempo_atual - tempo_inicial) // 1000
+    tempo_restante = max(0, tempo_total - tempo_passado)
+    game_over = tempo_restante == 0
 
     teclas = pygame.key.get_pressed()
 
@@ -73,7 +82,7 @@ while True:
             timer_pisca = 0
     tela.fill((0, 0, 0))
 
-    # a imagem verde duplicada aqui
+    # a imagem verde duplicada aqui pra melhorar o tamanho da tela
     for x in range(0, LARGURA, fundo.get_width()):
         for y in range(0, ALTURA, fundo.get_height()):
             tela.blit(fundo, (x, y))
@@ -99,6 +108,48 @@ while True:
         status,
         alternar
     )
+    
+    escala_relogio = 5
+
+    largura = 5 * (escala_relogio * 4)
+    altura = 5 * escala_relogio
+
+    pos_x = LARGURA - largura - 20
+    pos_y = 20
+
+    desenhar_fundo_relogio(
+        tela,
+        pos_x - 5,
+        pos_y - 5,
+        largura + 10,
+        altura + 10,
+        (0, 0, 0)
+    )
+
+    for i in range(largura + 10):
+        setPixel(tela, pos_x - 5 + i, pos_y - 5, (255,255,255))
+        setPixel(tela, pos_x - 5 + i, pos_y + altura + 4, (255,255,255))
+
+    for j in range(altura + 10):
+        setPixel(tela, pos_x - 5, pos_y - 5 + j, (255,255,255))
+        setPixel(tela, pos_x + largura + 4, pos_y - 5 + j, (255,255,255))
+
+    desenhar_relogio(
+        tela,
+        tempo_restante,
+        pos_x,
+        pos_y,
+        escala=escala_relogio,
+        cor=(255,255,255)
+    )    
+    if game_over:
+        desenhar_modal(
+            tela, 300, 150, 400, 200, (255,255,255), (0,0,0)         
+        )
+
+        desenhar_texto(
+            tela, "GAME OVER", 330, 220, escala=6, cor=(255,255,255)
+        )
 
     pygame.display.flip()
     clock.tick(60)
