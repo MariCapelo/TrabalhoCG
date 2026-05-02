@@ -32,7 +32,7 @@ def escurecer_elipse(superficie, centro_x, centro_y, largura, altura, fator_bord
                 cor_atual = superficie.get_at((i, j))
                 superficie.set_at((i, j), escurecer_cor(cor_atual, fator))
 
-def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
+def desenhar_boneca(tela, x, y, e, cores, estado):
     """
     tela: tela no Pygame onde a boneca vai ficar
     x, y: Coordenadas na tela
@@ -42,6 +42,10 @@ def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
     sombra_y = y + 7*e
     sombra_largura = 11*e
     sombra_altura = 3*e
+    
+    if estado['passo'] != 0:
+        sombra_largura = 11.5*e
+        sombra_altura = 3.5*e
 
     escurecer_elipse(tela, x, sombra_y, sombra_largura, sombra_altura)
 
@@ -84,7 +88,7 @@ def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
         set_pixel_bloco(tela, x - 4*e, y + 5*e, 3*e, 2*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 1*e, y + 5*e, 3*e, 2*e, cores['PELE_SOMBRA'])
     else:
-        if alternar%2 == 0:
+        if estado['alternar']%2 == 0:
             set_pixel_bloco(tela, x - 4*e, y + 4*e, 3*e, 2*e, cores['PELE_SOMBRA']) 
             set_pixel_bloco(tela, x + 1*e, y + 5*e, 3*e, 2*e, cores['PELE_SOMBRA'])
         else:
@@ -98,7 +102,7 @@ def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
         set_pixel_bloco(tela, x - 6*e, y + 2*e, 2*e, 2*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 4*e, y + 2*e, 2*e, 2*e, cores['PELE_SOMBRA'])
     else:
-        offset = (1*e) if alternar%2 == 0 else 0
+        offset = (1*e) if estado['alternar']%2 == 0 else 0
         set_pixel_bloco(tela, x - 5*e, y - 3*e + offset, 1*e, 5*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 4*e, y - 3*e - offset, 1*e, 5*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x - 6*e, y + 2*e + offset, 2*e, 2*e, cores['PELE_SOMBRA'])

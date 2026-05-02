@@ -21,13 +21,12 @@ x_c, y_c = 240, 205
 escala = 3
 
 # Variáveis de estado para animação
-status = {'passo': 0, 'piscando': False, 'olhar': 1}
+status = {'passo': 0, 'piscando': False, 'olhar': 1, 'alternar': 0}
 contador_anim = 0
 timer_pisca = 0
-alternar = 0 
 
+# Função para detectar coordenadas a parti do clique do mouse ao clicar na tela
 def identificar_coordenadas_mapa():
-    # Função para detectar coordenadas a parti do clique do mouse ao clicar na tela
     mouse_x, mouse_y = pygame.mouse.get_pos()
     mouse_click = pygame.mouse.get_pressed()
     if mouse_click[0]:  # Verifica se o botão esquerdo do mouse foi clicado
@@ -82,16 +81,18 @@ while True:
     camera_x = max(0, min(camera_x, MAP_LARGURA - LARGURA))
     camera_y = max(0, min(camera_y, MAP_ALTURA - ALTURA))
     
+    # Condição para alternar entre os passos da animação de caminhada
     if movendo:
         contador_anim += 1
         if contador_anim > 10:
             status['passo'] = 1
-            alternar += 1
+            status['alternar'] += 1
             contador_anim = 0
     else:
         status['passo'] = 0
-        alternar = 0
+        status['alternar'] = 0
 
+    # Animação de piscar a cada 150 frames
     timer_pisca += 1
     if timer_pisca > 150:
         status['piscando'] = True
@@ -124,8 +125,7 @@ while True:
             'AZUL': (20,170,255),
             'FUNDO': (220,220,220)
         },
-        status,
-        alternar
+        status
     )
 
     pygame.display.flip()
