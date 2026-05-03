@@ -14,7 +14,8 @@ tela = pygame.display.set_mode((LARGURA, ALTURA))
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
 # Carregando imagem de fundo
-fundo = pygame.image.load('./fundo3.png').convert()
+fundo = pygame.image.load('imagens/fundo3.png').convert()
+labirinto = pygame.image.load('imagens/labirinto3.png').convert_alpha()
 
 # Posição inicial da menina no mundo e sua escala (saindo da casa)
 x_c, y_c = 240, 205
@@ -105,6 +106,11 @@ while True:
     for x in range(0, MAP_LARGURA, fundo.get_width()):
         for y in range(0, MAP_ALTURA, fundo.get_height()):
             tela.blit(fundo, (x - camera_x, y - camera_y))
+
+    # Labirinto no centro do mundo (nao da tela)
+    labirinto_x = (MAP_LARGURA - labirinto.get_width()) // 2
+    labirinto_y = (MAP_ALTURA - labirinto.get_height()) // 2
+    tela.blit(labirinto, (labirinto_x - camera_x, labirinto_y - camera_y))
 
 
     desenhar_casa(tela)
