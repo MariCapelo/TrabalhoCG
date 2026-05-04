@@ -1,7 +1,6 @@
 from render.renderizacao import setPixel
 from ui.dicionario import desenhar_texto
 
-
 def desenhar_overlay_escuro(tela, largura, altura, intensidade=3):
     for x in range(largura):
         for y in range(altura):
