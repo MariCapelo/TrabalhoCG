@@ -5,12 +5,12 @@ from entidades.bonequinha import desenhar_boneca
 from render.transformacoes import (
     identidade, translacao, multiplica_matrizes, aplicar_transformacao
 )
-from entidades.casa import desenhar_casa_pixel
+from entidades.casa import desenhar_casa
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
-from entidades.onibus import desenhar_onibus_pixel
-from render.renderizacao import setPixel
+#from entidades.onibus import desenhar_onibus_pixel
+from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
 
@@ -33,7 +33,8 @@ alternar = 0
 
 tempo_total = 20
 tempo_inicial = pygame.time.get_ticks()
-tempo_game_over = 0  # 👈 controle do fade
+tempo_game_over = 0  
+tempo_vitoria = 0
 
 estado = "menu"
 opcao_menu = 0  
@@ -44,7 +45,6 @@ while True:
             pygame.quit()
             sys.exit()
 
-        # ================= MENU INPUT =================
         if estado == "menu":
             if event.type == pygame.KEYDOWN:
 
@@ -55,35 +55,32 @@ while True:
                     opcao_menu = (opcao_menu + 1) % 2
 
                 if event.key == pygame.K_RETURN:
-                    if opcao_menu == 0:  # START
+                    if opcao_menu == 0:
                         estado = "jogo"
                         tempo_inicial = pygame.time.get_ticks()
-                    elif opcao_menu == 1:  # SAIR
+                    elif opcao_menu == 1:
                         pygame.quit()
                         sys.exit()
 
-        # ================= GAME OVER INPUT =================
         if estado == "jogo":
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     estado = "menu"
 
-    # ================= MENU =================
     if estado == "menu":
 
         tela.blit(fundo, (0, 0))
-
         desenhar_overlay_escuro(tela, LARGURA, ALTURA, intensidade=3)
-
         desenhar_menu(tela, LARGURA, ALTURA, opcao_menu)
 
-    # ================= JOGO =================
     elif estado == "jogo":
 
         tempo_atual = pygame.time.get_ticks()
         tempo_passado = (tempo_atual - tempo_inicial) // 1000
         tempo_restante = max(0, tempo_total - tempo_passado)
         game_over = tempo_restante == 0
+
+        vitoria = x_c > 800
 
         teclas = pygame.key.get_pressed()
 
@@ -92,7 +89,7 @@ while True:
 
         m = identidade()
 
-        if not game_over:
+        if not game_over and not vitoria:
 
             if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
                 m = multiplica_matrizes(translacao(-3, 0), m)
@@ -114,7 +111,6 @@ while True:
 
         x_c, y_c = aplicar_transformacao(m, x_c, y_c)
 
-        # animação
         if movendo:
             contador_anim += 1
             if contador_anim > 10:
@@ -125,7 +121,6 @@ while True:
             status['passo'] = 0
             alternar = 0
 
-        # piscar
         timer_pisca += 1
         if timer_pisca > 150:
             status['piscando'] = True
@@ -133,10 +128,10 @@ while True:
                 status['piscando'] = False
                 timer_pisca = 0
 
-        # fundo
         tela.blit(fundo, (0, 0))
-      # desenhar_onibus_pixel(tela, 40, 30)
-        desenhar_casa_pixel(tela, 20, 20)
+
+        # desenhar_onibus_pixel(tela, 40, 30)
+        desenhar_casa(tela, 20, 20)
         desenhar_boneca(
             tela,
             x_c,
@@ -159,8 +154,13 @@ while True:
 
         desenhar_hud(tela, tempo_restante, LARGURA)
 
-        # ================= GAME OVER =================
-        if game_over:
+        if vitoria:
+            tempo_vitoria += 1
+            desenhar_tela_vitoria(tela, LARGURA, ALTURA, tempo_vitoria)
+        else:
+            tempo_vitoria = 0
+
+        if game_over and not vitoria:
             tempo_game_over += 1
             desenhar_tela_game_over(tela, LARGURA, ALTURA, tempo_game_over)
         else:
