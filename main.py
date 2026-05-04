@@ -9,7 +9,6 @@ from entidades.casa import desenhar_casa
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
-#from entidades.onibus import desenhar_onibus_pixel
 from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
@@ -17,16 +16,17 @@ pygame.init()
 LARGURA, ALTURA = 1000, 500
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 
-fundo = pygame.image.load('./assets/fundo3.png').convert()
-fundo = pygame.transform.scale(fundo, (LARGURA, ALTURA))
+MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
-x_c, y_c = 400, 300
-escala = 4
+fundo = pygame.image.load('./assets/fundo3.png').convert()
+labirinto = pygame.image.load('./assets/labirinto3.png').convert_alpha()
+
+x_c, y_c = 240, 205
+escala = 3
 
 clock = pygame.time.Clock()
 
-status = {'passo': 0, 'piscando': False, 'olhar': 0}
-
+status = {'passo': 0, 'piscando': False, 'olhar': 1}
 contador_anim = 0
 timer_pisca = 0
 alternar = 0 
@@ -47,13 +47,10 @@ while True:
 
         if estado == "menu":
             if event.type == pygame.KEYDOWN:
-
                 if event.key == pygame.K_UP:
                     opcao_menu = (opcao_menu - 1) % 2
-
                 if event.key == pygame.K_DOWN:
                     opcao_menu = (opcao_menu + 1) % 2
-
                 if event.key == pygame.K_RETURN:
                     if opcao_menu == 0:
                         estado = "jogo"
@@ -68,8 +65,7 @@ while True:
                     estado = "menu"
 
     if estado == "menu":
-
-        tela.blit(fundo, (0, 0))
+        tela.blit(pygame.transform.scale(fundo, (LARGURA, ALTURA)), (0, 0))
         desenhar_overlay_escuro(tela, LARGURA, ALTURA, intensidade=3)
         desenhar_menu(tela, LARGURA, ALTURA, opcao_menu)
 
@@ -80,13 +76,13 @@ while True:
         tempo_restante = max(0, tempo_total - tempo_passado)
         game_over = tempo_restante == 0
 
-        vitoria = x_c > 800
+        # vitória baseada na posição no mapa - ajeitar
+        vitoria = y_c < 100  
 
         teclas = pygame.key.get_pressed()
 
         movendo = False
         status['olhar'] = 0
-
         m = identidade()
 
         if not game_over and not vitoria:
@@ -111,6 +107,15 @@ while True:
 
         x_c, y_c = aplicar_transformacao(m, x_c, y_c)
 
+        x_c = max(0, min(x_c, MAP_LARGURA))
+        y_c = max(0, min(y_c, MAP_ALTURA))
+
+        camera_x = x_c - LARGURA // 2
+        camera_y = y_c - ALTURA // 2
+
+        camera_x = max(0, min(camera_x, MAP_LARGURA - LARGURA))
+        camera_y = max(0, min(camera_y, MAP_ALTURA - ALTURA))
+
         if movendo:
             contador_anim += 1
             if contador_anim > 10:
@@ -128,14 +133,22 @@ while True:
                 status['piscando'] = False
                 timer_pisca = 0
 
-        tela.blit(fundo, (0, 0))
+        tela.fill((0, 0, 0))
 
-        # desenhar_onibus_pixel(tela, 40, 30)
-        desenhar_casa(tela, 20, 20)
+        for x in range(0, MAP_LARGURA, fundo.get_width()):
+            for y in range(0, MAP_ALTURA, fundo.get_height()):
+                tela.blit(fundo, (x - camera_x, y - camera_y))
+
+        lab_x = (MAP_LARGURA - labirinto.get_width()) // 2
+        lab_y = (MAP_ALTURA - labirinto.get_height()) // 2
+        tela.blit(labirinto, (lab_x - camera_x, lab_y - camera_y))
+
+        desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
+
         desenhar_boneca(
             tela,
-            x_c,
-            y_c,
+            x_c - camera_x,
+            y_c - camera_y,
             escala,
             {
                 'BRANCO': (255,255,255),
