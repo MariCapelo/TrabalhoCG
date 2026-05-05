@@ -26,7 +26,7 @@ escala = 3
 
 clock = pygame.time.Clock()
 
-status = {'passo': 0, 'piscando': False, 'olhar': 1}
+status = {'passo': 0, 'piscando': False, 'olhar': 1, 'alternar': 0}
 contador_anim = 0
 timer_pisca = 0
 alternar = 0 
@@ -120,11 +120,10 @@ while True:
             contador_anim += 1
             if contador_anim > 10:
                 status['passo'] = 1
-                alternar += 1
+                status['alternar'] += 1
                 contador_anim = 0
         else:
             status['passo'] = 0
-            alternar = 0
 
         timer_pisca += 1
         if timer_pisca > 150:
@@ -138,10 +137,6 @@ while True:
         for x in range(0, MAP_LARGURA, fundo.get_width()):
             for y in range(0, MAP_ALTURA, fundo.get_height()):
                 tela.blit(fundo, (x - camera_x, y - camera_y))
-
-        lab_x = (MAP_LARGURA - labirinto.get_width()) // 2
-        lab_y = (MAP_ALTURA - labirinto.get_height()) // 2
-        tela.blit(labirinto, (lab_x - camera_x, lab_y - camera_y))
 
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
 
@@ -161,9 +156,13 @@ while True:
                 'AZUL': (20,170,255),
                 'FUNDO': (220,220,220)
             },
-            status,
-            alternar
+            status
         )
+
+        lab_x = (MAP_LARGURA - labirinto.get_width()) // 2
+        lab_y = (MAP_ALTURA - labirinto.get_height()) // 2
+        tela.blit(labirinto, (lab_x - camera_x, lab_y - camera_y))
+
 
         desenhar_hud(tela, tempo_restante, LARGURA)
 
