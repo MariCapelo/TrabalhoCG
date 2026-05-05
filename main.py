@@ -82,7 +82,6 @@ while True:
         teclas = pygame.key.get_pressed()
 
         movendo = False
-        status['olhar'] = 0
         m = identidade()
 
         if not game_over and not vitoria:
