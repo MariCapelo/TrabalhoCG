@@ -1,11 +1,9 @@
 import pygame
 import sys
-
 from entidades.bonequinha import desenhar_boneca
-from render.transformacoes import (
-    identidade, translacao, multiplica_matrizes, aplicar_transformacao
-)
+from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
+from entidades.sombra_labirinto import criar_sombra_labirinto, desenhar_sombra_labirinto
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
@@ -14,8 +12,21 @@ from entidades.onibus import desenhar_onibus
 
 pygame.init()
 
+
+def criar_hitbox_boneca(x, y, escala):
+    return pygame.Rect(int(x - 8 * escala), int(y - 18 * escala), int(16 * escala), int(25 * escala))
+
+
+def colide_com_mapa(mascara_colisao, mascara_hitbox, hitbox, origem_x, origem_y):
+    offset = (hitbox.left - origem_x, hitbox.top - origem_y)
+    return mascara_colisao.overlap(mascara_hitbox, offset) is not None
+
+# Configurações da tela
 # ================= CONFIG =================
 LARGURA, ALTURA = 1000, 500
+tela = pygame.display.set_mode((LARGURA, ALTURA))
+
+# Configurações de mundo 
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
 tela = pygame.display.set_mode((LARGURA, ALTURA))
@@ -151,8 +162,81 @@ def desenhar(estado, opcao_menu, jogo_data, tempo_restante, vitoria, game_over):
         desenhar_overlay_escuro(tela, LARGURA, ALTURA, intensidade=3)
         desenhar_menu(tela, LARGURA, ALTURA, opcao_menu)
 
+    # Lógica do Jogo ---------------------------------------------------------------------------------------------
     elif estado == "jogo":
 
+        # Cálculo do tempo restante e condições de vitória/derrota
+        tempo_atual = pygame.time.get_ticks()
+        tempo_passado = (tempo_atual - tempo_inicial) // 1000
+        tempo_restante = max(0, tempo_total - tempo_passado)
+        game_over = tempo_restante == 0
+
+        # vitória baseada na posição no mapa - ajeitar
+        vitoria = y_c >  MAP_ALTURA - 100  
+
+        # Lógica para contorlar po movimento da menina baseado em teclas precionadas e Translação
+        teclas = pygame.key.get_pressed()
+
+        movendo = False
+        m = identidade()
+
+        if not game_over and not vitoria:
+
+            if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
+                m = multiplica_matrizes(translacao(-3, 0), m)
+                movendo = True
+                status['olhar'] = -1
+
+            if teclas[pygame.K_RIGHT] or teclas[pygame.K_d]:
+                m = multiplica_matrizes(translacao(3, 0), m)
+                movendo = True
+                status['olhar'] = 1
+
+            if teclas[pygame.K_UP] or teclas[pygame.K_w]:
+                m = multiplica_matrizes(translacao(0, -3), m)
+                movendo = True
+
+            if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
+                m = multiplica_matrizes(translacao(0, 3), m)
+                movendo = True
+
+        proximo_x, proximo_y = aplicar_transformacao(m, x_c, y_c)
+
+        proximo_x = max(8 * escala, min(proximo_x, MAP_LARGURA - 8 * escala))
+        proximo_y = max(18 * escala, min(proximo_y, MAP_ALTURA - 7 * escala))
+
+        hitbox_proxima = criar_hitbox_boneca(proximo_x, proximo_y, escala)
+
+        if not colide_com_mapa(mascara_colisao, mascara_hitbox_boneca, hitbox_proxima, labUp_x, labUp_y):
+            x_c, y_c = proximo_x, proximo_y
+
+        # Limitar a posição da bonequinha dentro dos limites do mapa
+        x_c = max(8 * escala, min(x_c, MAP_LARGURA - 8 * escala))
+        y_c = max(18 * escala, min(y_c, MAP_ALTURA - 7 * escala))
+
+        # Cálculo da posição da câmera para centralizar na bonequinha
+        camera_x = x_c - LARGURA // 2
+        camera_y = y_c - ALTURA // 2
+
+        camera_x = max(0, min(camera_x, MAP_LARGURA - LARGURA))
+        camera_y = max(0, min(camera_y, MAP_ALTURA - ALTURA))
+
+        # Lógica de animação da bonequinha, piscar e alternar passos
+        if movendo:
+            contador_anim += 1
+            if contador_anim > 10:
+                status['passo'] = 1
+                status['alternar'] += 1
+                contador_anim = 0
+        else:
+            status['passo'] = 0
+
+        timer_pisca += 1
+        if timer_pisca > 150:
+            status['piscando'] = True
+            if timer_pisca > 162:
+                status['piscando'] = False
+                timer_pisca = 0
         cam_x = max(0, min(jogo_data['x_c'] - LARGURA // 2, MAP_LARGURA - LARGURA))
         cam_y = max(0, min(jogo_data['y_c'] - ALTURA // 2, MAP_ALTURA - ALTURA))
 
@@ -192,6 +276,8 @@ def desenhar(estado, opcao_menu, jogo_data, tempo_restante, vitoria, game_over):
             jogo_data['status'],
             jogo_data['alternar']
         )
+        
+        tela.blit(labirintoUp, (labUp_x - camera_x, labUp_y - camera_y))
 
         desenhar_hud(tela, tempo_restante, LARGURA)
 

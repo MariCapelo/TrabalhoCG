@@ -32,7 +32,7 @@ def escurecer_elipse(superficie, centro_x, centro_y, largura, altura, fator_bord
                 cor_atual = superficie.get_at((i, j))
                 superficie.set_at((i, j), escurecer_cor(cor_atual, fator))
 
-def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
+def desenhar_boneca(tela, x, y, e, cores, estado):
     """
     tela: tela no Pygame onde a boneca vai ficar
     x, y: Coordenadas na tela
@@ -56,14 +56,24 @@ def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
         set_pixel_bloco(tela, x - 3*e, y - 11*e, 2*e, 1*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 1*e, y - 11*e, 2*e, 1*e, cores['PELE_SOMBRA'])
     else:
-        # Olho Esquerdo
-        set_pixel_bloco(tela, x - 3*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
-        set_pixel_bloco(tela, x - 3*e + estado['olhar'], y - 11*e, 1*e, 1*e, cores['PRETO'])
-        set_pixel_bloco(tela, x - 3*e + estado['olhar'], y - 10*e, 1*e, 1*e, cores['AZUL'])
-        # Olho Direito
-        set_pixel_bloco(tela, x + 1*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
-        set_pixel_bloco(tela, x + 1*e + estado['olhar'], y - 11*e, 1*e, 1*e, cores['PRETO'])
-        set_pixel_bloco(tela, x + 1*e + estado['olhar'], y - 10*e, 1*e, 1*e, cores['AZUL'])
+        if estado['olhar'] == -1:
+            # Olho Esquerdo
+            set_pixel_bloco(tela, x - 3*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
+            set_pixel_bloco(tela, x - 3*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
+            set_pixel_bloco(tela, x - 3*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
+            # Olho Direito
+            set_pixel_bloco(tela, x + 1*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
+            set_pixel_bloco(tela, x + 1*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
+            set_pixel_bloco(tela, x + 1*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
+        if estado['olhar'] == 1:
+            # Olho Esquerdo
+            set_pixel_bloco(tela, x - 3*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
+            set_pixel_bloco(tela, x - 2*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
+            set_pixel_bloco(tela, x - 2*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
+            # Olho Direito
+            set_pixel_bloco(tela, x + 1*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
+            set_pixel_bloco(tela, x + 2*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
+            set_pixel_bloco(tela, x + 2*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
 
     # CABELO E PESCOÇO
     set_pixel_bloco(tela, x - 1*e, y - 6*e, 2*e, 1*e, cores['PELE_SOMBRA'])
@@ -84,7 +94,7 @@ def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
         set_pixel_bloco(tela, x - 4*e, y + 5*e, 3*e, 2*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 1*e, y + 5*e, 3*e, 2*e, cores['PELE_SOMBRA'])
     else:
-        if alternar%2 == 0:
+        if estado['alternar']%2 == 0:
             set_pixel_bloco(tela, x - 4*e, y + 4*e, 3*e, 2*e, cores['PELE_SOMBRA']) 
             set_pixel_bloco(tela, x + 1*e, y + 5*e, 3*e, 2*e, cores['PELE_SOMBRA'])
         else:
@@ -98,7 +108,7 @@ def desenhar_boneca(tela, x, y, e, cores, estado, alternar):
         set_pixel_bloco(tela, x - 6*e, y + 2*e, 2*e, 2*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 4*e, y + 2*e, 2*e, 2*e, cores['PELE_SOMBRA'])
     else:
-        offset = (1*e) if alternar%2 == 0 else 0
+        offset = (1*e) if estado['alternar']%2 == 0 else 0
         set_pixel_bloco(tela, x - 5*e, y - 3*e + offset, 1*e, 5*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x + 4*e, y - 3*e - offset, 1*e, 5*e, cores['PELE_SOMBRA'])
         set_pixel_bloco(tela, x - 6*e, y + 2*e + offset, 2*e, 2*e, cores['PELE_SOMBRA'])
