@@ -10,36 +10,44 @@ from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
 from ui.youwin import desenhar_tela_vitoria
+from entidades.onibus import desenhar_onibus 
 
 pygame.init()
 
+# ================= CONFIG =================
 LARGURA, ALTURA = 1000, 500
-tela = pygame.display.set_mode((LARGURA, ALTURA))
-
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
+
+tela = pygame.display.set_mode((LARGURA, ALTURA))
+clock = pygame.time.Clock()
 
 fundo = pygame.image.load('./assets/fundo3.png').convert()
 labirinto = pygame.image.load('./assets/labirinto3.png').convert_alpha()
 
-x_c, y_c = 240, 205
-escala = 3
+def get_posicao_onibus():
+    lab_x = (MAP_LARGURA - labirinto.get_width()) // 2
+    lab_y = 300
 
-clock = pygame.time.Clock()
+    bus_x = lab_x + labirinto.get_width() // 2 - 60
+    bus_y = lab_y + labirinto.get_height() + 200
 
-status = {'passo': 0, 'piscando': False, 'olhar': 1}
-contador_anim = 0
-timer_pisca = 0
-alternar = 0 
+    return bus_x, bus_y
 
-tempo_total = 20
-tempo_inicial = pygame.time.get_ticks()
-tempo_game_over = 0  
-tempo_vitoria = 0
+def reiniciar_jogo():
+    return {
+        'x_c': 240,
+        'y_c': 205,
+        'status': {'passo': 0, 'piscando': False, 'olhar': 1},
+        'contador_anim': 0,
+        'timer_pisca': 0,
+        'alternar': 0,
+        'tempo_inicial': pygame.time.get_ticks(),
+        'tempo_game_over': 0,
+        'tempo_vitoria': 0,
+        'movendo': False
+    }
 
-estado = "menu"
-opcao_menu = 0  
-
-while True:
+def processar_eventos(estado, opcao_menu, jogo_data):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -49,20 +57,94 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     opcao_menu = (opcao_menu - 1) % 2
-                if event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN:
                     opcao_menu = (opcao_menu + 1) % 2
-                if event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN:
                     if opcao_menu == 0:
-                        estado = "jogo"
-                        tempo_inicial = pygame.time.get_ticks()
+                        return "jogo", opcao_menu, reiniciar_jogo()
                     elif opcao_menu == 1:
                         pygame.quit()
                         sys.exit()
 
-        if estado == "jogo":
+        elif estado == "jogo":
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    estado = "menu"
+                    return "menu", opcao_menu, jogo_data
+
+    return estado, opcao_menu, jogo_data
+
+def atualizar_jogo(data):
+    teclas = pygame.key.get_pressed()
+
+    tempo_atual = pygame.time.get_ticks()
+    tempo_passado = (tempo_atual - data['tempo_inicial']) // 1000
+    tempo_restante = max(0, 20 - tempo_passado)
+
+    game_over = tempo_restante == 0
+
+    bus_x, bus_y = get_posicao_onibus()
+
+    vitoria = (
+        abs(data['x_c'] - bus_x) < 60 and
+        abs(data['y_c'] - bus_y) < 30
+    )
+
+    m = identidade()
+    data['movendo'] = False
+    data['status']['olhar'] = 0
+
+    if not game_over and not vitoria:
+        dx, dy = 0, 0
+
+        if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
+            dx = -3
+            data['status']['olhar'] = -1
+
+        if teclas[pygame.K_RIGHT] or teclas[pygame.K_d]:
+            dx = 3
+            data['status']['olhar'] = 1
+
+        if teclas[pygame.K_UP] or teclas[pygame.K_w]:
+            dy = -3
+
+        if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
+            dy = 3
+
+        if dx != 0 or dy != 0:
+            m = multiplica_matrizes(translacao(dx, dy), m)
+            data['movendo'] = True
+
+    data['x_c'], data['y_c'] = aplicar_transformacao(m, data['x_c'], data['y_c'])
+
+    data['x_c'] = max(0, min(data['x_c'], MAP_LARGURA))
+    data['y_c'] = max(0, min(data['y_c'], MAP_ALTURA))
+
+    if data['movendo']:
+        data['contador_anim'] += 1
+        if data['contador_anim'] > 10:
+            data['status']['passo'] = 1
+            data['alternar'] += 1
+            data['contador_anim'] = 0
+    else:
+        data['status']['passo'] = 0
+        data['alternar'] = 0
+
+    data['timer_pisca'] += 1
+    if data['timer_pisca'] > 150:
+        data['status']['piscando'] = True
+        if data['timer_pisca'] > 162:
+            data['status']['piscando'] = False
+            data['timer_pisca'] = 0
+
+    if vitoria:
+        data['tempo_vitoria'] += 1
+
+    if game_over and not vitoria:
+        data['tempo_game_over'] += 1
+
+    return tempo_restante, vitoria, game_over
+
+def desenhar(estado, opcao_menu, jogo_data, tempo_restante, vitoria, game_over):
 
     if estado == "menu":
         tela.blit(pygame.transform.scale(fundo, (LARGURA, ALTURA)), (0, 0))
@@ -71,113 +153,70 @@ while True:
 
     elif estado == "jogo":
 
-        tempo_atual = pygame.time.get_ticks()
-        tempo_passado = (tempo_atual - tempo_inicial) // 1000
-        tempo_restante = max(0, tempo_total - tempo_passado)
-        game_over = tempo_restante == 0
-
-        # vitória baseada na posição no mapa - ajeitar
-        vitoria = y_c < 100  
-
-        teclas = pygame.key.get_pressed()
-
-        movendo = False
-        status['olhar'] = 0
-        m = identidade()
-
-        if not game_over and not vitoria:
-
-            if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
-                m = multiplica_matrizes(translacao(-3, 0), m)
-                movendo = True
-                status['olhar'] = -1
-
-            if teclas[pygame.K_RIGHT] or teclas[pygame.K_d]:
-                m = multiplica_matrizes(translacao(3, 0), m)
-                movendo = True
-                status['olhar'] = 1
-
-            if teclas[pygame.K_UP] or teclas[pygame.K_w]:
-                m = multiplica_matrizes(translacao(0, -3), m)
-                movendo = True
-
-            if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
-                m = multiplica_matrizes(translacao(0, 3), m)
-                movendo = True
-
-        x_c, y_c = aplicar_transformacao(m, x_c, y_c)
-
-        x_c = max(0, min(x_c, MAP_LARGURA))
-        y_c = max(0, min(y_c, MAP_ALTURA))
-
-        camera_x = x_c - LARGURA // 2
-        camera_y = y_c - ALTURA // 2
-
-        camera_x = max(0, min(camera_x, MAP_LARGURA - LARGURA))
-        camera_y = max(0, min(camera_y, MAP_ALTURA - ALTURA))
-
-        if movendo:
-            contador_anim += 1
-            if contador_anim > 10:
-                status['passo'] = 1
-                alternar += 1
-                contador_anim = 0
-        else:
-            status['passo'] = 0
-            alternar = 0
-
-        timer_pisca += 1
-        if timer_pisca > 150:
-            status['piscando'] = True
-            if timer_pisca > 162:
-                status['piscando'] = False
-                timer_pisca = 0
+        cam_x = max(0, min(jogo_data['x_c'] - LARGURA // 2, MAP_LARGURA - LARGURA))
+        cam_y = max(0, min(jogo_data['y_c'] - ALTURA // 2, MAP_ALTURA - ALTURA))
 
         tela.fill((0, 0, 0))
 
         for x in range(0, MAP_LARGURA, fundo.get_width()):
             for y in range(0, MAP_ALTURA, fundo.get_height()):
-                tela.blit(fundo, (x - camera_x, y - camera_y))
+                tela.blit(fundo, (x - cam_x, y - cam_y))
 
         lab_x = (MAP_LARGURA - labirinto.get_width()) // 2
-        lab_y = (MAP_ALTURA - labirinto.get_height()) // 2
-        tela.blit(labirinto, (lab_x - camera_x, lab_y - camera_y))
+        lab_y = 300
+        tela.blit(labirinto, (lab_x - cam_x, lab_y - cam_y))
 
-        desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
+        desenhar_casa(tela, 50 - cam_x, 100 - cam_y)
+
+        bus_x, bus_y = get_posicao_onibus()
+        desenhar_onibus(tela, bus_x - cam_x, bus_y - cam_y, 3)
+
+        cores = {
+            'BRANCO': (255,255,255),
+            'PRETO': (0,0,0),
+            'LARANJA': (255,120,0),
+            'PELE': (214,193,140),
+            'PELE_SOMBRA': (190,150,120),
+            'ROSA': (190,0,150),
+            'ROSA_CLARO': (220,0,180),
+            'AZUL': (20,170,255),
+            'FUNDO': (220,220,220)
+        }
 
         desenhar_boneca(
             tela,
-            x_c - camera_x,
-            y_c - camera_y,
-            escala,
-            {
-                'BRANCO': (255,255,255),
-                'PRETO': (0,0,0),
-                'LARANJA': (255,120,0),
-                'PELE': (214,193,140),
-                'PELE_SOMBRA': (190,150,120),
-                'ROSA': (190,0,150),
-                'ROSA_CLARO': (220,0,180),
-                'AZUL': (20,170,255),
-                'FUNDO': (220,220,220)
-            },
-            status,
-            alternar
+            jogo_data['x_c'] - cam_x,
+            jogo_data['y_c'] - cam_y,
+            3,
+            cores,
+            jogo_data['status'],
+            jogo_data['alternar']
         )
 
         desenhar_hud(tela, tempo_restante, LARGURA)
 
         if vitoria:
-            tempo_vitoria += 1
-            desenhar_tela_vitoria(tela, LARGURA, ALTURA, tempo_vitoria)
-        else:
-            tempo_vitoria = 0
+            desenhar_tela_vitoria(tela, LARGURA, ALTURA, jogo_data['tempo_vitoria'])
+        elif game_over:
+            desenhar_tela_game_over(tela, LARGURA, ALTURA, jogo_data['tempo_game_over'])
 
-        if game_over and not vitoria:
-            tempo_game_over += 1
-            desenhar_tela_game_over(tela, LARGURA, ALTURA, tempo_game_over)
-        else:
-            tempo_game_over = 0
+def main():
+    estado = "menu"
+    opcao_menu = 0
+    jogo_data = reiniciar_jogo()
 
-    pygame.display.flip()
-    clock.tick(60)
+    while True:
+        estado, opcao_menu, jogo_data = processar_eventos(estado, opcao_menu, jogo_data)
+
+        tempo_restante, vitoria, game_over = 0, False, False
+
+        if estado == "jogo":
+            tempo_restante, vitoria, game_over = atualizar_jogo(jogo_data)
+
+        desenhar(estado, opcao_menu, jogo_data, tempo_restante, vitoria, game_over)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+if __name__ == "__main__":
+    main()
