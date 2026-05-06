@@ -1,6 +1,10 @@
 import pygame
-from render.renderizacao import desenhar_poligono, scanline, bresenham, setPixel
+from render.renderizacao import desenhar_poligono, scanline, bresenhamsetPixel
 
+#def textura_telhado_telha(tela,telhado):
+    #RGB
+    #aqui eu vou usar varios tons, pois fiz bem desenhado como imagino a telha
+    
 
 def textura_parede(tela,x,y,altura,largura):
     #RGB
@@ -80,9 +84,8 @@ def desenhar_casa(tela, base_x, base_y):
     (base_x+210, base_y+120),
     (base_x+170, base_y+120)
 ]   
-   
+    
     textura_parede(tela, base_x, base_y, 120, 260)
-    #textura_sombra_telha_parede(tela, base_x, base_y, 120, 260)
     desenhar_poligono(tela, porta, (255,255,255))
     scanline(tela, porta, (120, 60, 0))     
 
