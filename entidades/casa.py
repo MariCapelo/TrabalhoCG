@@ -1,5 +1,5 @@
 import pygame
-from render.renderizacao import desenhar_poligono, scanline, bresenhamsetPixel
+from render.renderizacao import desenhar_poligono, scanline, bresenham, setPixel
 
 #def textura_telhado_telha(tela,telhado):
     #RGB
