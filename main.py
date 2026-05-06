@@ -11,6 +11,15 @@ from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
 
+
+def criar_hitbox_boneca(x, y, escala):
+    return pygame.Rect(int(x - 8 * escala), int(y - 18 * escala), int(16 * escala), int(25 * escala))
+
+
+def colide_com_mapa(mascara_colisao, mascara_hitbox, hitbox, origem_x, origem_y):
+    offset = (hitbox.left - origem_x, hitbox.top - origem_y)
+    return mascara_colisao.overlap(mascara_hitbox, offset) is not None
+
 # Configurações da tela
 LARGURA, ALTURA = 1000, 500
 tela = pygame.display.set_mode((LARGURA, ALTURA))
@@ -18,14 +27,23 @@ tela = pygame.display.set_mode((LARGURA, ALTURA))
 # Configurações de mundo 
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
-# Carregamento de sprites e criação de sombras
+# Carregamento de sprites, colisões e criação de sombras
 fundo = pygame.image.load('./assets/fundo3.png').convert()
 labirintoUp = pygame.image.load('./assets/sprite-LabUp.png').convert_alpha()
 LabirintoDown = pygame.image.load('./assets/sprite-LabDown.png').convert_alpha()
+mapa_colisao = pygame.image.load('./assets/colisao_labirinto.png').convert_alpha()
 
 # Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
 escala = 3
+mascara_colisao = pygame.mask.from_surface(mapa_colisao)
+mascara_hitbox_boneca = pygame.Mask((16 * escala, 25 * escala), fill=True)
+
+# Posiçao inicial do labirinto
+labUp_x = (MAP_LARGURA - labirintoUp.get_width()) // 2
+labUp_y = (MAP_ALTURA - labirintoUp.get_height()) // 2
+labdown_x = (MAP_LARGURA - LabirintoDown.get_width()) // 2
+labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
 
 clock = pygame.time.Clock()
 
@@ -87,7 +105,7 @@ while True:
         game_over = tempo_restante == 0
 
         # vitória baseada na posição no mapa - ajeitar
-        vitoria = y_c < 100  
+        vitoria = y_c >  MAP_ALTURA - 100  
 
         # Lógica para contorlar po movimento da menina baseado em teclas precionadas e Translação
         teclas = pygame.key.get_pressed()
@@ -115,11 +133,19 @@ while True:
                 m = multiplica_matrizes(translacao(0, 3), m)
                 movendo = True
 
-        x_c, y_c = aplicar_transformacao(m, x_c, y_c)
+        proximo_x, proximo_y = aplicar_transformacao(m, x_c, y_c)
+
+        proximo_x = max(8 * escala, min(proximo_x, MAP_LARGURA - 8 * escala))
+        proximo_y = max(18 * escala, min(proximo_y, MAP_ALTURA - 7 * escala))
+
+        hitbox_proxima = criar_hitbox_boneca(proximo_x, proximo_y, escala)
+
+        if not colide_com_mapa(mascara_colisao, mascara_hitbox_boneca, hitbox_proxima, labUp_x, labUp_y):
+            x_c, y_c = proximo_x, proximo_y
 
         # Limitar a posição da bonequinha dentro dos limites do mapa
-        x_c = max(0, min(x_c, MAP_LARGURA))
-        y_c = max(0, min(y_c, MAP_ALTURA))
+        x_c = max(8 * escala, min(x_c, MAP_LARGURA - 8 * escala))
+        y_c = max(18 * escala, min(y_c, MAP_ALTURA - 7 * escala))
 
         # Cálculo da posição da câmera para centralizar na bonequinha
         camera_x = x_c - LARGURA // 2
@@ -150,12 +176,6 @@ while True:
         for x in range(0, MAP_LARGURA, fundo.get_width()):
             for y in range(0, MAP_ALTURA, fundo.get_height()):
                 tela.blit(fundo, (x - camera_x, y - camera_y))
-
-        labUp_x = (MAP_LARGURA - labirintoUp.get_width()) // 2
-        labUp_y = ((MAP_ALTURA - labirintoUp.get_height()) // 2) 
-
-        labdown_x = (MAP_LARGURA - LabirintoDown.get_width()) // 2
-        labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
 
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
 
