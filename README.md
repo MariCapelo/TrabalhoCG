@@ -1,39 +1,86 @@
-# Como rodar o código?
-## Passo 1: Instale o UV
--> *Se voce possuir o uv pode pular essa etapa e ir para o passo 2.*
+# The Last Bus
 
-O uv é um gerenciador de pacotes como o pip. Caso voce não possua o uv instalado pode instalar por meio desse [link](https://docs.astral.sh/uv/getting-started/installation/).
+**The Last Bus** é um jogo 2D estilo arcade desenvolvido como projeto prático de Computação Gráfica. O desafio central é atravessar um labirinto e alcançar o ônibus antes que o tempo se esgote.
 
-Não esqueça de verificar se a instalaçao foi bem sucedida usando o comando (para usuários windows):
-```
-uv --version
-```
-Ele deve retornar a versão do uv se a instalação for bem sucedida.
+---
 
-## Passo 2: Criando venv
-Após a instalação do uv, entre na pasta do projeto e crie o ambiente virtual:
-```
-uv venv
-```
-Ative o ambiente virtual:
-```
-.venv/Scripts/activate
-```
-**Importante** -> verifique se a versão do python usada no ambiente virtual é a mesma do projeto (3.12.9)
-## Passo 3: Instalando dependencias
-Com o ambiente virtual criado, rode o comando:
-```
-uv sync
-```
-Por meio do `uv.lock`, esse comando irá instalar no seu ambiente virtual todas as dependecias necessárias para rodar os scripts do projeto. No caso desse projeto, apenas o `Pygame` é necessário.
+## Objetivo
 
-## Passo 4: Rodando script 
-Para rodar o jogo basta digitar:
-```
-uv run main.py
+- Chegar ao ônibus antes que ele parta  
+- Navegar pelo labirinto otimizando o tempo  
+
+---
+
+## Controles
+
+- `W / ↑` → mover para cima  
+- `S / ↓` → mover para baixo  
+- `A / ←` → mover para esquerda  
+- `D / →` → mover para direita  
+- `R` → voltar ao menu  
+
+---
+
+## Conceitos de Computação Gráfica Utilizados
+
+O desenvolvimento aplicou os seguintes pilares da disciplina:
+
+### Rasterização
+- Algoritmo de **Bresenham** para traçado de retas  
+
+### Preenchimento
+- Algoritmo **Scanline**  
+
+### Transformações Geométricas
+- **Translação:** movimentação fluida do personagem  
+
+### Janela e Viewport
+- Sistema de câmera baseado em coordenadas de mundo (World Coordinates)  
+
+### Textura
+- Aplicação de imagens como fundo e labirinto  
+
+### Animação
+- Ciclo de movimento do personagem  
+- Animação de piscar  
+
+### Interação
+- Entrada via teclado  
+- Menu interativo  
+
+---
+
+## Arquitetura do Projeto
+
+O código foi modularizado em camadas:
+
+| Módulo | Descrição |
+| :--- | :--- |
+| `entidades/` | Personagem, como casa, menininha e ônibus |
+| `render/` | Algoritmos gráficos (Bresenham, scanline, etc.) |
+| `ui/` | Interface (menu, HUD, telas de vitória e derrota) |
+| `assets/` | Imagens utilizadas no jogo |
+| `main.py` | Loop principal e controle do jogo |
+
+---
+
+## Como Executar
+
+### Pré-requisitos
+- Python 3.x  
+- Pygame  
+
+### Instalação
+```bash
+pip install pygame
 ```
 
-## Para mais informações 
-- [Uv Features](https://docs.astral.sh/uv/getting-started/features/)
-- [Pygame](https://www.pygame.org/docs/)
+###Execução
+```bash
+python main.py
+```
 
+## Equipe
+Larissa Kelly
+Leticia Carneiro
+Marina Campelo
