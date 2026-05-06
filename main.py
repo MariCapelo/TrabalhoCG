@@ -1,11 +1,9 @@
 import pygame
 import sys
-
 from entidades.bonequinha import desenhar_boneca
-from render.transformacoes import (
-    identidade, translacao, multiplica_matrizes, aplicar_transformacao
-)
+from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
+from entidades.sombra_labirinto import criar_sombra_labirinto, desenhar_sombra_labirinto
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
@@ -13,33 +11,42 @@ from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
 
+# Configurações da tela
 LARGURA, ALTURA = 1000, 500
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 
+# Configurações de mundo 
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
+# Carregamento de sprites e criação de sombras
 fundo = pygame.image.load('./assets/fundo3.png').convert()
-labirinto = pygame.image.load('./assets/labirinto3.png').convert_alpha()
+labirintoUp = pygame.image.load('./assets/sprite-LabUp.png').convert_alpha()
+LabirintoDown = pygame.image.load('./assets/sprite-LabDown.png').convert_alpha()
 
+# Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
 escala = 3
 
 clock = pygame.time.Clock()
 
+# Variaveis de animação e estado
 status = {'passo': 0, 'piscando': False, 'olhar': 1, 'alternar': 0}
 contador_anim = 0
 timer_pisca = 0
 alternar = 0 
 
-tempo_total = 20
+# Tempo total do jogo em segundos
+tempo_total = 5000
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
 
+# Variaveis de Menu
 estado = "menu"
 opcao_menu = 0  
 
 while True:
+    # Loop controlador de eventos e lógica de jogo 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -64,13 +71,16 @@ while True:
                 if event.key == pygame.K_r:
                     estado = "menu"
 
+    # Logica do Menu ---------------------------------------------------------------------------------------------
     if estado == "menu":
         tela.blit(pygame.transform.scale(fundo, (LARGURA, ALTURA)), (0, 0))
         desenhar_overlay_escuro(tela, LARGURA, ALTURA, intensidade=3)
         desenhar_menu(tela, LARGURA, ALTURA, opcao_menu)
 
+    # Lógica do Jogo ---------------------------------------------------------------------------------------------
     elif estado == "jogo":
 
+        # Cálculo do tempo restante e condições de vitória/derrota
         tempo_atual = pygame.time.get_ticks()
         tempo_passado = (tempo_atual - tempo_inicial) // 1000
         tempo_restante = max(0, tempo_total - tempo_passado)
@@ -79,6 +89,7 @@ while True:
         # vitória baseada na posição no mapa - ajeitar
         vitoria = y_c < 100  
 
+        # Lógica para contorlar po movimento da menina baseado em teclas precionadas e Translação
         teclas = pygame.key.get_pressed()
 
         movendo = False
@@ -106,15 +117,18 @@ while True:
 
         x_c, y_c = aplicar_transformacao(m, x_c, y_c)
 
+        # Limitar a posição da bonequinha dentro dos limites do mapa
         x_c = max(0, min(x_c, MAP_LARGURA))
         y_c = max(0, min(y_c, MAP_ALTURA))
 
+        # Cálculo da posição da câmera para centralizar na bonequinha
         camera_x = x_c - LARGURA // 2
         camera_y = y_c - ALTURA // 2
 
         camera_x = max(0, min(camera_x, MAP_LARGURA - LARGURA))
         camera_y = max(0, min(camera_y, MAP_ALTURA - ALTURA))
 
+        # Lógica de animação da bonequinha, piscar e alternar passos
         if movendo:
             contador_anim += 1
             if contador_anim > 10:
@@ -137,7 +151,15 @@ while True:
             for y in range(0, MAP_ALTURA, fundo.get_height()):
                 tela.blit(fundo, (x - camera_x, y - camera_y))
 
+        labUp_x = (MAP_LARGURA - labirintoUp.get_width()) // 2
+        labUp_y = ((MAP_ALTURA - labirintoUp.get_height()) // 2) 
+
+        labdown_x = (MAP_LARGURA - LabirintoDown.get_width()) // 2
+        labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
+
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
+
+        tela.blit(LabirintoDown, (labdown_x - camera_x, labdown_y - camera_y))
 
         desenhar_boneca(
             tela,
@@ -157,11 +179,8 @@ while True:
             },
             status
         )
-
-        lab_x = (MAP_LARGURA - labirinto.get_width()) // 2
-        lab_y = (MAP_ALTURA - labirinto.get_height()) // 2
-        tela.blit(labirinto, (lab_x - camera_x, lab_y - camera_y))
-
+        
+        tela.blit(labirintoUp, (labUp_x - camera_x, labUp_y - camera_y))
 
         desenhar_hud(tela, tempo_restante, LARGURA)
 
