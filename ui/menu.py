@@ -8,8 +8,8 @@ def desenhar_overlay_escuro(tela, largura, altura, intensidade=3):
                 setPixel(tela, x, y, (0,0,0))
 
 def desenhar_menu(tela, largura, altura, opcao_selecionada):
-    desenhar_texto(tela, "THE LAST BUS", largura//2 - 195, 105, 7, (0,0,0))
-    desenhar_texto(tela, "THE LAST BUS", largura//2 - 200, 100, 7, (255,255,255))
+    desenhar_texto(tela, "O ULTIMO ONIBUS", largura//2 - 195, 105, 7, (0,0,0))
+    desenhar_texto(tela, "O ULTIMO ONIBUS", largura//2 - 200, 100, 7, (255,255,255))
     cor_start = (255,255,255)
     cor_sair = (255,255,255)
 
@@ -20,7 +20,7 @@ def desenhar_menu(tela, largura, altura, opcao_selecionada):
 
     desenhar_texto(tela, "START", largura//2 - 80, 260, 6, cor_start)
     desenhar_texto(tela, "SAIR", largura//2 - 60, 330, 6, cor_sair)
-    desenhar_texto(tela, "PRESS ENTER", largura//2 - 100,400,escala=3,cor=(200,200,200)
+    desenhar_texto(tela, "APERTE ENTER", largura//2 - 100,400,escala=3,cor=(200,200,200)
     )
 
     if opcao_selecionada == 0:

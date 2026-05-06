@@ -3,7 +3,6 @@ import sys
 from entidades.bonequinha import desenhar_boneca
 from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
-from entidades.sombra_labirinto import criar_sombra_labirinto, desenhar_sombra_labirinto
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
@@ -31,7 +30,7 @@ MAP_LARGURA, MAP_ALTURA = 1000, 2000
 fundo = pygame.image.load('./assets/fundo3.png').convert()
 labirintoUp = pygame.image.load('./assets/sprite-LabUp.png').convert_alpha()
 LabirintoDown = pygame.image.load('./assets/sprite-LabDown.png').convert_alpha()
-mapa_colisao = pygame.image.load('./assets/colisao_labirinto.png').convert_alpha()
+mapa_colisao = pygame.image.load('./assets/colisao_labirinto3.png').convert_alpha()
 
 # Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
@@ -54,7 +53,7 @@ timer_pisca = 0
 alternar = 0 
 
 # Tempo total do jogo em segundos
-tempo_total = 5000
+tempo_total = 70
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
@@ -80,6 +79,7 @@ while True:
                     if opcao_menu == 0:
                         estado = "jogo"
                         tempo_inicial = pygame.time.get_ticks()
+                        x_c, y_c = 240, 205
                     elif opcao_menu == 1:
                         pygame.quit()
                         sys.exit()
@@ -135,6 +135,7 @@ while True:
 
         proximo_x, proximo_y = aplicar_transformacao(m, x_c, y_c)
 
+        # Fazer a verificação se a menina nao vai colidir com um pixel de colisao do mapa 
         proximo_x = max(8 * escala, min(proximo_x, MAP_LARGURA - 8 * escala))
         proximo_y = max(18 * escala, min(proximo_y, MAP_ALTURA - 7 * escala))
 
@@ -173,12 +174,19 @@ while True:
 
         tela.fill((0, 0, 0))
 
+        # Desenhando fundo em toda a extenção do mapa usando a posição da câmera para criar um efeito de scroll
         for x in range(0, MAP_LARGURA, fundo.get_width()):
             for y in range(0, MAP_ALTURA, fundo.get_height()):
                 tela.blit(fundo, (x - camera_x, y - camera_y))
 
+        # Desenhando a casa
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
 
+
+        # Para criar o efeito de profundidade, o labirinto é dividido em duas partes:
+        # a parte inferior (LabirintoDown) é desenhada antes da bonequinha, 
+        # e a parte superior (labirintoUp) é desenhada depois.
+        
         tela.blit(LabirintoDown, (labdown_x - camera_x, labdown_y - camera_y))
 
         desenhar_boneca(
@@ -202,8 +210,10 @@ while True:
         
         tela.blit(labirintoUp, (labUp_x - camera_x, labUp_y - camera_y))
 
+        # Controlador do tempo restante e exibição da HUD
         desenhar_hud(tela, tempo_restante, LARGURA)
 
+        # Condições de vitoria e derrota 
         if vitoria:
             tempo_vitoria += 1
             desenhar_tela_vitoria(tela, LARGURA, ALTURA, tempo_vitoria)
