@@ -1,5 +1,6 @@
 import pygame
 import sys
+
 from entidades.bonequinha import desenhar_boneca
 from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
@@ -9,7 +10,6 @@ from ui.gameover import desenhar_tela_game_over
 from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
-
 
 def criar_hitbox_boneca(x, y, escala):
     return pygame.Rect(int(x - 8 * escala), int(y - 18 * escala), int(16 * escala), int(25 * escala))
@@ -27,10 +27,10 @@ tela = pygame.display.set_mode((LARGURA, ALTURA))
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
 # Carregamento de sprites, colisões e criação de sombras
-fundo = pygame.image.load('./assets/fundo3.png').convert()
-labirintoUp = pygame.image.load('./assets/sprite-LabUp.png').convert_alpha()
-LabirintoDown = pygame.image.load('./assets/sprite-LabDown.png').convert_alpha()
-mapa_colisao = pygame.image.load('./assets/colisao_labirinto3.png').convert_alpha()
+fundo = pygame.image.load('./sprites/fundo3.png').convert()
+labirintoUp = pygame.image.load('./sprites/sprite-LabUp.png').convert_alpha()
+LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha()
+mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
 
 # Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
@@ -188,26 +188,13 @@ while True:
         # e a parte superior (labirintoUp) é desenhada depois.
         
         tela.blit(LabirintoDown, (labdown_x - camera_x, labdown_y - camera_y))
-
         desenhar_boneca(
             tela,
             x_c - camera_x,
             y_c - camera_y,
             escala,
-            {
-                'BRANCO': (255,255,255),
-                'PRETO': (0,0,0),
-                'LARANJA': (255,120,0),
-                'PELE': (214,193,140),
-                'PELE_SOMBRA': (190,150,120),
-                'ROSA': (190,0,150),
-                'ROSA_CLARO': (220,0,180),
-                'AZUL': (20,170,255),
-                'FUNDO': (220,220,220)
-            },
             status
         )
-        
         tela.blit(labirintoUp, (labUp_x - camera_x, labUp_y - camera_y))
 
         # Controlador do tempo restante e exibição da HUD
