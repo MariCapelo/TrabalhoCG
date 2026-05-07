@@ -87,6 +87,11 @@ def textura_parede(tela,x,y,altura,largura,textura_offset_x=None,textura_offset_
     cor_ripa_escura_sombra = (179, 104, 111)
     cor_ripa_clara_sombra = (191, 117, 125)
     altura_sombra = 15
+
+    for yy in range(y, y + altura_sombra):
+        for xx in range(x, x + largura):
+            setPixel(tela, xx, yy, cor_ripa_clara_sombra)
+
     #Esse for adiciona os detalhes nas ripas, alternado entre um tom mais claro e um mais escuro
     for xx in range (x, x+ largura, 8):
         for yy in range (y, y + altura):
