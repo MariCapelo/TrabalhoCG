@@ -1,12 +1,115 @@
 import pygame
 from render.renderizacao import desenhar_poligono, scanline, bresenham, setPixel
+from ui.relogio import desenhar_pixel_grande
 
-#def textura_telhado_telha(tela,telhado):
-    #RGB
-    #aqui eu vou usar varios tons, pois fiz bem desenhado como imagino a telha
+def pontos_textura_telhado(tela, pontos_telhado, textura_offset_x=0, textura_offset_y=0):
+    # encontra topo
+    ponto_topo = pontos_telhado[0]
+    for ponto in pontos_telhado:
+        if ponto[1] < ponto_topo[1]:
+            ponto_topo = ponto
+
+    # encontra base esquerda/direita do triangulo (não topo)
+    pontos_base = []
+    for ponto in pontos_telhado:
+        if ponto != ponto_topo:
+            pontos_base.append(ponto)
+
+    if len(pontos_base) < 2:
+        return None, None, None
+
+    ponto_base_esquerda = pontos_base[0]
+    for ponto in pontos_base:
+        if ponto[0] < ponto_base_esquerda[0]:
+            ponto_base_esquerda = ponto
+
+    ponto_base_direita = pontos_base[0]
+    for ponto in pontos_base:
+        if ponto[0] > ponto_base_direita[0]:
+            ponto_base_direita = ponto
+
+    x_topo, y_topo = ponto_topo
+    x_base_esquerda, y_base_esquerda = ponto_base_esquerda
+    x_base_direita, y_base_direita = ponto_base_direita
+
+    # a base esquerda e direita estão na mesma altura Y
+    y_base = y_base_esquerda
+
+    # cores
+    COR_DIV =(142,46,1)
+    #SOMBRA = (182, 88, 20)
+    #SOMBRA = (174, 79, 19)
+    SOMBRA2 = (142,46,1)
+    LUZ = (201, 110, 22)
+    LUZ2 = (204, 122, 42)
+    LUZ3 = (201, 125, 54)
+    COR_ENTRE = (196, 115, 41)
+    # desenha linhas horizontais a cada 8 pixels, do topo até a base
+    for i, y in enumerate(range(int(y_topo), int(y_base), 2)):
+
+        # t indica o progresso: 0 = no topo, 1 = na base
+        t = (y - y_topo) / (y_base - y_topo)
+
+        # interpolação: calcula o X das bordas esquerda e direita nessa altura Y
+        x_esq = int(x_topo + t * (x_base_esquerda - x_topo))
+        x_dir = int(x_topo + t * (x_base_direita - x_topo))
+
+        if i % 5 == 0:
+            cor_linha = LUZ2
+        elif i % 5 == 1:
+            cor_linha = LUZ
+        elif i % 5 == 2:
+            cor_linha = COR_ENTRE
+        elif i % 5 == 3:
+            cor_linha = LUZ3
+        else:
+           cor_linha = SOMBRA2
     
 
-def textura_parede(tela,x,y,altura,largura):
+        # desenha a linha horizontal dentro das bordas do triângulo
+        for x in range(x_esq, x_dir, 2):
+            desenhar_pixel_grande(tela, x, y, escala=3, cor=cor_linha)
+
+            if i % 10 == 0:
+                for dy in range(11):
+                    setPixel(tela, x_esq + 52, y - dy, COR_DIV)
+                    setPixel(tela, x_esq + 53, y - dy, COR_DIV)
+
+                    setPixel(tela, x_dir - 40, y - dy, COR_DIV)
+                    setPixel(tela, x_dir - 41, y - dy, COR_DIV)
+
+            if i==19:
+                for dy in range(11):
+                    setPixel(tela, x_dir - 60, y - dy, COR_DIV)
+                    setPixel(tela, x_dir - 61, y - dy, COR_DIV)
+            if i%25==0:
+                    for dy in range(11):
+                        setPixel(tela, x_dir - 70, y - dy, COR_DIV)
+                        setPixel(tela, x_dir - 71, y - dy, COR_DIV)
+                    
+            if i% 35==0:
+                for dy in range(11):
+                    setPixel(tela, x_dir - 50, y - dy, COR_DIV)
+                    setPixel(tela, x_dir - 51, y - dy, COR_DIV)
+
+                    setPixel(tela, x_esq + 80, y - dy, COR_DIV)
+                    setPixel(tela, x_esq + 81, y - dy, COR_DIV)
+            if i == 15:
+                for dy in range(11):
+                    setPixel(tela, x_esq + 39, y - dy, COR_DIV)
+                    setPixel(tela, x_esq + 40, y - dy, COR_DIV)
+            if i==39:
+                for dy in range(11):
+                    setPixel(tela, x_esq + 43, y - dy, COR_DIV)
+                    setPixel(tela, x_esq + 44, y - dy, COR_DIV)
+
+                    setPixel(tela, x_dir - 60, y - dy, COR_DIV)
+                    setPixel(tela, x_dir - 61, y - dy, COR_DIV)
+
+                    setPixel(tela, x_dir - 160, y - dy, COR_DIV)
+                    setPixel(tela, x_dir - 161, y - dy, COR_DIV)
+
+def textura_parede(tela,x,y,altura,largura,textura_offset_x=0,textura_offset_y=0):
     #RGB
     cor_ripa_escura =(201,117,131) 
     cor_ripa_clara = (219,132,146)
@@ -47,13 +150,14 @@ def textura_parede(tela,x,y,altura,largura):
                     setPixel(tela, xx + 5, yy+3, cor_detalhes_ripa1)
 
 
-def textura_janela(tela, x, y, largura, altura):
-    #RGB
-    cor_ripa_janela  = (156,90, 60)
-    cor_borda_ripa_janela = (115, 38, 5)
+def desenhar_casa(tela, base_x, base_y, textura_offset_x=None, textura_offset_y=None):
 
-
-def desenhar_casa(tela, base_x, base_y):
+    # Quando o main nao passa offsets, calcula usando a ancora fixa da casa no mundo.
+    if textura_offset_x is None or textura_offset_y is None:
+        casa_mundo_x = 50
+        casa_mundo_y = 100
+        textura_offset_x = casa_mundo_x - base_x
+        textura_offset_y = casa_mundo_y - base_y
 
     # PAREDES
     casa = [
@@ -76,7 +180,7 @@ def desenhar_casa(tela, base_x, base_y):
 
     scanline(tela, casa, (230, 140, 140))   
     scanline(tela, telhado, (160, 80, 0))   
-
+    pontos_textura_telhado(tela, telhado, textura_offset_x, textura_offset_y)
     # PORTA
     porta = [
     (base_x+170, base_y+40),   
@@ -85,10 +189,10 @@ def desenhar_casa(tela, base_x, base_y):
     (base_x+170, base_y+120)
 ]   
     
-    textura_parede(tela, base_x, base_y, 120, 260)
+    textura_parede(tela, base_x, base_y, 120, 260, textura_offset_x, textura_offset_y)
     desenhar_poligono(tela, porta, (255,255,255))
-    scanline(tela, porta, (120, 60, 0))     
-
+    scanline(tela, porta, (120, 60, 0))
+    pontos_textura_telhado(tela, telhado, textura_offset_x, textura_offset_y)
     # JANELINHA
     janela = [
     (base_x+30, base_y+30),
@@ -98,7 +202,7 @@ def desenhar_casa(tela, base_x, base_y):
 ]
 
     desenhar_poligono(tela, janela, (255,255,255))
-    scanline(tela, janela, (240, 210, 150)) 
+    scanline(tela, janela, (240, 210, 150))
 
 # cruzinha da janela 
 # parte horizontal (meio)
@@ -108,6 +212,7 @@ def desenhar_casa(tela, base_x, base_y):
     base_x+90, base_y+50,
     (255,255,255)
 )
+ 
 
 # parte vertical (meio)
     bresenham(
