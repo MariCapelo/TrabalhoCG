@@ -51,6 +51,10 @@ labUp_y = (MAP_ALTURA - labirintoUp.get_height()) // 2
 labdown_x = (MAP_LARGURA - LabirintoDown.get_width()) // 2
 labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
 
+# Animação do menu
+cont_aparecer = 0
+APARECER = True
+
 clock = pygame.time.Clock()
 
 # Variaveis de animação e estado
