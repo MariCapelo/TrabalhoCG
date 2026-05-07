@@ -8,6 +8,7 @@ from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
 from ui.youwin import desenhar_tela_vitoria
+from entidades.onibus import desenhar_onibus 
 
 pygame.init()
 
@@ -85,9 +86,9 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     opcao_menu = (opcao_menu - 1) % 2
-                if event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN:
                     opcao_menu = (opcao_menu + 1) % 2
-                if event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN:
                     if opcao_menu == 0:
                         estado = "jogo"
                         tempo_inicial = pygame.time.get_ticks()
@@ -100,7 +101,7 @@ while True:
                         pygame.quit()
                         sys.exit()
 
-        if estado == "jogo":
+        elif estado == "jogo":
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     estado = "menu"
@@ -251,5 +252,5 @@ while True:
             tempo_game_over = 0
             som_game_over_tocado = False
 
-    pygame.display.flip()
-    clock.tick(60)
+        pygame.display.flip()
+        clock.tick(60)
