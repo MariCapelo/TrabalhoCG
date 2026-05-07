@@ -11,6 +11,13 @@ from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
 
+passo_1 = pygame.mixer.Sound('./sons/Passo_1.mp3')
+passo_2 = pygame.mixer.Sound('./sons/Passo_2.mp3')
+som_vitoria = pygame.mixer.Sound('./sons/win.mp3')
+som_game_over = pygame.mixer.Sound('./sons/fail.mp3')
+canal_passos = pygame.mixer.Channel(1)
+canal_passos.set_volume(0.4)
+
 def criar_hitbox_boneca(x, y, escala):
     return pygame.Rect(int(x - 8 * escala), int(y - 18 * escala), int(16 * escala), int(25 * escala))
 
@@ -49,14 +56,19 @@ clock = pygame.time.Clock()
 # Variaveis de animação e estado
 status = {'passo': 0, 'piscando': False, 'olhar': 1, 'alternar': 0}
 contador_anim = 0
+contador_som = 0
+tocar = False
 timer_pisca = 0
 alternar = 0 
+ultimo_passo_tocado = status['alternar']
 
 # Tempo total do jogo em segundos
-tempo_total = 70
+tempo_total = 60
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
+som_vitoria_tocado = False
+som_game_over_tocado = False
 
 # Variaveis de Menu
 estado = "menu"
@@ -80,6 +92,10 @@ while True:
                         estado = "jogo"
                         tempo_inicial = pygame.time.get_ticks()
                         x_c, y_c = 240, 205
+                        tempo_game_over = 0
+                        tempo_vitoria = 0
+                        som_vitoria_tocado = False
+                        som_game_over_tocado = False
                     elif opcao_menu == 1:
                         pygame.quit()
                         sys.exit()
@@ -88,6 +104,8 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     estado = "menu"
+                    som_vitoria_tocado = False
+                    som_game_over_tocado = False
 
     # Logica do Menu ---------------------------------------------------------------------------------------------
     if estado == "menu":
@@ -102,7 +120,7 @@ while True:
         tempo_atual = pygame.time.get_ticks()
         tempo_passado = (tempo_atual - tempo_inicial) // 1000
         tempo_restante = max(0, tempo_total - tempo_passado)
-        game_over = tempo_restante == 0
+        derrota = tempo_restante == 0
 
         # vitória baseada na posição no mapa - ajeitar
         vitoria = y_c >  MAP_ALTURA - 100  
@@ -113,7 +131,7 @@ while True:
         movendo = False
         m = identidade()
 
-        if not game_over and not vitoria:
+        if not derrota and not vitoria:
 
             if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
                 m = multiplica_matrizes(translacao(-3, 0), m)
@@ -158,12 +176,24 @@ while True:
         # Lógica de animação da bonequinha, piscar e alternar passos
         if movendo:
             contador_anim += 1
+            contador_som += 1
             if contador_anim > 10:
                 status['passo'] = 1
                 status['alternar'] += 1
                 contador_anim = 0
+            if contador_som > 20:
+                tocar = True
+                contador_som = 0
         else:
             status['passo'] = 0
+            contador_anim = 0
+            contador_som = 0
+            tocar = False
+
+        if tocar and status['alternar'] != ultimo_passo_tocado:
+            som_passo = passo_1 if status['alternar'] % 2 == 0 else passo_2
+            canal_passos.play(som_passo)
+            ultimo_passo_tocado = status['alternar']
 
         timer_pisca += 1
         if timer_pisca > 150:
@@ -202,16 +232,24 @@ while True:
 
         # Condições de vitoria e derrota 
         if vitoria:
+            if not som_vitoria_tocado:
+                som_vitoria.play()
+                som_vitoria_tocado = True
             tempo_vitoria += 1
             desenhar_tela_vitoria(tela, LARGURA, ALTURA, tempo_vitoria)
         else:
             tempo_vitoria = 0
+            som_vitoria_tocado = False
 
-        if game_over and not vitoria:
+        if derrota and not vitoria:
+            if not som_game_over_tocado:
+                som_game_over.play()
+                som_game_over_tocado = True
             tempo_game_over += 1
             desenhar_tela_game_over(tela, LARGURA, ALTURA, tempo_game_over)
         else:
             tempo_game_over = 0
+            som_game_over_tocado = False
 
     pygame.display.flip()
     clock.tick(60)
