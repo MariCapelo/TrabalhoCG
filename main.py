@@ -1,6 +1,5 @@
 import pygame
 import sys
-
 from entidades.bonequinha import desenhar_boneca
 from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
@@ -35,7 +34,7 @@ tela = pygame.display.set_mode((LARGURA, ALTURA))
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
 # Carregamento de sprites, colisões e criação de sombras
-fundo = pygame.image.load('./sprites/fundo3.png').convert()
+fundo = pygame.image.load('./sprites/fundo3.png').convert_alpha()
 labirintoUp = pygame.image.load('./sprites/sprite-LabUp.png').convert_alpha()
 LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha()
 mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
@@ -64,7 +63,7 @@ alternar = 0
 ultimo_passo_tocado = status['alternar']
 
 # Tempo total do jogo em segundos
-tempo_total = 60
+tempo_total = 50
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
@@ -252,5 +251,5 @@ while True:
             tempo_game_over = 0
             som_game_over_tocado = False
 
-        pygame.display.flip()
-        clock.tick(60)
+    pygame.display.flip()
+    clock.tick(60)
