@@ -1,5 +1,19 @@
 import pygame
 
+cores = {
+            'BRANCO': (255,255,255),
+            'PRETO': (0,0,0),
+            'LARANJA': (255,120,0),
+            'LARANJA_CLARO1': (255, 138, 35),
+            'LARANJA_CLARO2': (253, 153, 66),
+            'PELE': (214,193,140),
+            'PELE_SOMBRA': (190,150,120),
+            'ROSA': (190,0,150),
+            'ROSA_CLARO': (220,0,180),
+            'AZUL': (20,170,255),
+            'FUNDO': (220,220,220),
+        }
+
 def set_pixel_bloco(superficie, x, y, largura, altura, cor):
     largura_tela, altura_tela = superficie.get_size()
     for i in range(int(x), int(x + largura)):
@@ -32,7 +46,7 @@ def escurecer_elipse(superficie, centro_x, centro_y, largura, altura, fator_bord
                 cor_atual = superficie.get_at((i, j))
                 superficie.set_at((i, j), escurecer_cor(cor_atual, fator))
 
-def desenhar_boneca(tela, x, y, e, cores, estado):
+def desenhar_boneca(tela, x, y, e, estado):
     """
     tela: tela no Pygame onde a boneca vai ficar
     x, y: Coordenadas na tela
@@ -61,10 +75,12 @@ def desenhar_boneca(tela, x, y, e, cores, estado):
             set_pixel_bloco(tela, x - 3*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
             set_pixel_bloco(tela, x - 3*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
             set_pixel_bloco(tela, x - 3*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
+
             # Olho Direito
             set_pixel_bloco(tela, x + 1*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
             set_pixel_bloco(tela, x + 1*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
             set_pixel_bloco(tela, x + 1*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
+
         if estado['olhar'] == 1:
             # Olho Esquerdo
             set_pixel_bloco(tela, x - 3*e, y - 12*e, 2*e, 3*e, cores['BRANCO'])
@@ -75,6 +91,8 @@ def desenhar_boneca(tela, x, y, e, cores, estado):
             set_pixel_bloco(tela, x + 2*e , y - 11*e, 1*e, 1*e, cores['PRETO'])
             set_pixel_bloco(tela, x + 2*e , y - 10*e, 1*e, 1*e, cores['AZUL'])
 
+        set_pixel_bloco(tela, x-1*e, y - 10*e, 2*e, 1*e, cores['PELE_SOMBRA']) # Sombra do Nariz
+
     # CABELO E PESCOÇO
     set_pixel_bloco(tela, x - 1*e, y - 6*e, 2*e, 1*e, cores['PELE_SOMBRA'])
     set_pixel_bloco(tela, x - 8*e, y - 18*e, 6*e, 5*e, cores['LARANJA'])
@@ -82,6 +100,14 @@ def desenhar_boneca(tela, x, y, e, cores, estado):
     set_pixel_bloco(tela, x - 4*e, y - 17*e, 8*e, 4*e, cores['LARANJA'])
     set_pixel_bloco(tela, x - 6*e, y - 17*e, 2*e, 8*e, cores['LARANJA'])
     set_pixel_bloco(tela, x + 4*e, y - 17*e, 2*e, 8*e, cores['LARANJA'])
+    set_pixel_bloco(tela, x - 7*e, y - 17*e, 4*e, 3*e, cores['LARANJA_CLARO1'])
+    set_pixel_bloco(tela, x - 7*e, y - 17*e, 2*e, 2*e, cores['LARANJA_CLARO2'])
+    set_pixel_bloco(tela, x - 5*e, y - 17*e, 2*e, 1*e, cores['LARANJA_CLARO2'])
+    set_pixel_bloco(tela, x + 3*e, y - 17*e, 4*e, 3*e, cores['LARANJA_CLARO1'])
+    set_pixel_bloco(tela, x + 5*e, y - 17*e, 2*e, 2*e, cores['LARANJA_CLARO2'])
+    set_pixel_bloco(tela, x + 3*e, y - 17*e, 2*e, 1*e, cores['LARANJA_CLARO2'])
+    set_pixel_bloco(tela, x - 3*e, y - 16*e, 6*e, 2*e, cores['LARANJA_CLARO1'])
+    set_pixel_bloco(tela, x - 3*e, y - 16*e, 6*e, 1*e, cores['LARANJA_CLARO2'])
 
     # CORPO (VESTIDO)
     set_pixel_bloco(tela, x - 4*e, y - 5*e, 8*e, 8*e, cores['ROSA'])

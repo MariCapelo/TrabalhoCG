@@ -3,7 +3,6 @@ import sys
 from entidades.bonequinha import desenhar_boneca
 from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
-from entidades.sombra_labirinto import criar_sombra_labirinto, desenhar_sombra_labirinto
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
@@ -11,6 +10,12 @@ from ui.youwin import desenhar_tela_vitoria
 
 pygame.init()
 
+passo_1 = pygame.mixer.Sound('./sons/Passo_1.mp3')
+passo_2 = pygame.mixer.Sound('./sons/Passo_2.mp3')
+som_vitoria = pygame.mixer.Sound('./sons/win.mp3')
+som_game_over = pygame.mixer.Sound('./sons/fail.mp3')
+canal_passos = pygame.mixer.Channel(1)
+canal_passos.set_volume(0.4)
 
 def criar_hitbox_boneca(x, y, escala):
     return pygame.Rect(int(x - 8 * escala), int(y - 18 * escala), int(16 * escala), int(25 * escala))
@@ -28,10 +33,11 @@ tela = pygame.display.set_mode((LARGURA, ALTURA))
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
 
 # Carregamento de sprites, colisões e criação de sombras
-fundo = pygame.image.load('./assets/fundo3.png').convert()
-labirintoUp = pygame.image.load('./assets/sprite-LabUp.png').convert_alpha()
-LabirintoDown = pygame.image.load('./assets/sprite-LabDown.png').convert_alpha()
-mapa_colisao = pygame.image.load('./assets/colisao_labirinto.png').convert_alpha()
+fundo = pygame.image.load('./sprites/fundo3.png').convert_alpha()
+labirintoUp = pygame.image.load('./sprites/sprite-LabUp.png').convert_alpha()
+LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha()
+mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
+pista = pygame.image.load('./sprites/pista.png').convert_alpha()
 
 # Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
@@ -45,19 +51,32 @@ labUp_y = (MAP_ALTURA - labirintoUp.get_height()) // 2
 labdown_x = (MAP_LARGURA - LabirintoDown.get_width()) // 2
 labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
 
+# Posição da pista do onibus
+pista_x = (MAP_LARGURA - pista.get_width()) 
+pista_y = (MAP_ALTURA - pista.get_height()) # y = 1700
+
+# Animação do menu
+cont_aparecer = 0
+APARECER = True
+
 clock = pygame.time.Clock()
 
 # Variaveis de animação e estado
 status = {'passo': 0, 'piscando': False, 'olhar': 1, 'alternar': 0}
 contador_anim = 0
+contador_som = 0
+tocar = False
 timer_pisca = 0
 alternar = 0 
+ultimo_passo_tocado = status['alternar']
 
 # Tempo total do jogo em segundos
-tempo_total = 5000
+tempo_total = 50
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
+som_vitoria_tocado = False
+som_game_over_tocado = False
 
 # Variaveis de Menu
 estado = "menu"
@@ -80,6 +99,11 @@ while True:
                     if opcao_menu == 0:
                         estado = "jogo"
                         tempo_inicial = pygame.time.get_ticks()
+                        x_c, y_c = 240, 205
+                        tempo_game_over = 0
+                        tempo_vitoria = 0
+                        som_vitoria_tocado = False
+                        som_game_over_tocado = False
                     elif opcao_menu == 1:
                         pygame.quit()
                         sys.exit()
@@ -88,6 +112,8 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     estado = "menu"
+                    som_vitoria_tocado = False
+                    som_game_over_tocado = False
 
     # Logica do Menu ---------------------------------------------------------------------------------------------
     if estado == "menu":
@@ -102,7 +128,7 @@ while True:
         tempo_atual = pygame.time.get_ticks()
         tempo_passado = (tempo_atual - tempo_inicial) // 1000
         tempo_restante = max(0, tempo_total - tempo_passado)
-        game_over = tempo_restante == 0
+        derrota = tempo_restante == 0
 
         # vitória baseada na posição no mapa - ajeitar
         vitoria = y_c >  MAP_ALTURA - 100  
@@ -113,7 +139,7 @@ while True:
         movendo = False
         m = identidade()
 
-        if not game_over and not vitoria:
+        if not derrota and not vitoria:
 
             if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
                 m = multiplica_matrizes(translacao(-3, 0), m)
@@ -135,6 +161,7 @@ while True:
 
         proximo_x, proximo_y = aplicar_transformacao(m, x_c, y_c)
 
+        # Fazer a verificação se a menina nao vai colidir com um pixel de colisao do mapa 
         proximo_x = max(8 * escala, min(proximo_x, MAP_LARGURA - 8 * escala))
         proximo_y = max(18 * escala, min(proximo_y, MAP_ALTURA - 7 * escala))
 
@@ -157,12 +184,24 @@ while True:
         # Lógica de animação da bonequinha, piscar e alternar passos
         if movendo:
             contador_anim += 1
+            contador_som += 1
             if contador_anim > 10:
                 status['passo'] = 1
                 status['alternar'] += 1
                 contador_anim = 0
+            if contador_som > 20:
+                tocar = True
+                contador_som = 0
         else:
             status['passo'] = 0
+            contador_anim = 0
+            contador_som = 0
+            tocar = False
+
+        if tocar and status['alternar'] != ultimo_passo_tocado:
+            som_passo = passo_1 if status['alternar'] % 2 == 0 else passo_2
+            canal_passos.play(som_passo)
+            ultimo_passo_tocado = status['alternar']
 
         timer_pisca += 1
         if timer_pisca > 150:
@@ -173,48 +212,54 @@ while True:
 
         tela.fill((0, 0, 0))
 
+        # Desenhando fundo em toda a extenção do mapa usando a posição da câmera para criar um efeito de scroll
         for x in range(0, MAP_LARGURA, fundo.get_width()):
             for y in range(0, MAP_ALTURA, fundo.get_height()):
                 tela.blit(fundo, (x - camera_x, y - camera_y))
 
+        # Desenhando a casa
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
 
-        tela.blit(LabirintoDown, (labdown_x - camera_x, labdown_y - camera_y))
+        # Desenhando a pista de chegada do onibus
+        tela.blit(pista, (pista_x - camera_x, pista_y - camera_y))
 
+        # Para criar o efeito de profundidade, o labirinto é dividido em duas partes:
+        # a parte inferior (LabirintoDown) é desenhada antes da bonequinha, 
+        # e a parte superior (labirintoUp) é desenhada depois.
+        
+        tela.blit(LabirintoDown, (labdown_x - camera_x, labdown_y - camera_y))
         desenhar_boneca(
             tela,
             x_c - camera_x,
             y_c - camera_y,
             escala,
-            {
-                'BRANCO': (255,255,255),
-                'PRETO': (0,0,0),
-                'LARANJA': (255,120,0),
-                'PELE': (214,193,140),
-                'PELE_SOMBRA': (190,150,120),
-                'ROSA': (190,0,150),
-                'ROSA_CLARO': (220,0,180),
-                'AZUL': (20,170,255),
-                'FUNDO': (220,220,220)
-            },
             status
         )
-        
         tela.blit(labirintoUp, (labUp_x - camera_x, labUp_y - camera_y))
 
+        # Controlador do tempo restante e exibição da HUD
         desenhar_hud(tela, tempo_restante, LARGURA)
 
+        # Condições de vitoria e derrota 
         if vitoria:
+            if not som_vitoria_tocado:
+                som_vitoria.play()
+                som_vitoria_tocado = True
             tempo_vitoria += 1
             desenhar_tela_vitoria(tela, LARGURA, ALTURA, tempo_vitoria)
         else:
             tempo_vitoria = 0
+            som_vitoria_tocado = False
 
-        if game_over and not vitoria:
+        if derrota and not vitoria:
+            if not som_game_over_tocado:
+                som_game_over.play()
+                som_game_over_tocado = True
             tempo_game_over += 1
             desenhar_tela_game_over(tela, LARGURA, ALTURA, tempo_game_over)
         else:
             tempo_game_over = 0
+            som_game_over_tocado = False
 
     pygame.display.flip()
     clock.tick(60)
