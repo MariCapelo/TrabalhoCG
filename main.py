@@ -38,6 +38,7 @@ fundo = pygame.image.load('./sprites/fundo3.png').convert_alpha()
 labirintoUp = pygame.image.load('./sprites/sprite-LabUp.png').convert_alpha()
 LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha()
 mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
+pista = pygame.image.load('./sprites/pista.png').convert_alpha()
 
 # Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
@@ -50,6 +51,10 @@ labUp_x = (MAP_LARGURA - labirintoUp.get_width()) // 2
 labUp_y = (MAP_ALTURA - labirintoUp.get_height()) // 2
 labdown_x = (MAP_LARGURA - LabirintoDown.get_width()) // 2
 labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
+
+# Posição da pista do onibus
+pista_x = (MAP_LARGURA - pista.get_width()) 
+pista_y = (MAP_ALTURA - pista.get_height()) # y = 1700
 
 # Animação do menu
 cont_aparecer = 0
@@ -216,6 +221,8 @@ while True:
         # Desenhando a casa
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
 
+        # Desenhando a pista de chegada do onibus
+        tela.blit(pista, (pista_x - camera_x, pista_y - camera_y))
 
         # Para criar o efeito de profundidade, o labirinto é dividido em duas partes:
         # a parte inferior (LabirintoDown) é desenhada antes da bonequinha, 
