@@ -1,8 +1,9 @@
 import pygame
 import sys
 from entidades.bonequinha import desenhar_boneca
-from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from entidades.casa import desenhar_casa
+from entidades.onibus import desenhar_onibus
+from render.transformacoes import (identidade, translacao, multiplica_matrizes, aplicar_transformacao)
 from ui.relogio import desenhar_hud
 from ui.menu import desenhar_menu, desenhar_overlay_escuro
 from ui.gameover import desenhar_tela_game_over
@@ -37,7 +38,7 @@ fundo = pygame.image.load('./sprites/fundo3.png').convert_alpha()
 labirintoUp = pygame.image.load('./sprites/sprite-LabUp.png').convert_alpha()
 LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha()
 mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
-pista = pygame.image.load('./sprites/pista.png').convert_alpha()
+pista = pygame.image.load('./sprites/pista2.png').convert_alpha()
 
 # Posição inicial da bonequinha esua escala de tamanho 
 x_c, y_c = 240, 205
@@ -54,10 +55,8 @@ labdown_y = (MAP_ALTURA - LabirintoDown.get_height()) // 2
 # Posição da pista do onibus
 pista_x = (MAP_LARGURA - pista.get_width()) 
 pista_y = (MAP_ALTURA - pista.get_height()) # y = 1700
-
-# Animação do menu
-cont_aparecer = 0
-APARECER = True
+onibus_x = 300
+onibus_y = pista_y + 10
 
 clock = pygame.time.Clock()
 
@@ -71,7 +70,7 @@ alternar = 0
 ultimo_passo_tocado = status['alternar']
 
 # Tempo total do jogo em segundos
-tempo_total = 50
+tempo_total = 1000
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
@@ -131,7 +130,7 @@ while True:
         derrota = tempo_restante == 0
 
         # vitória baseada na posição no mapa - ajeitar
-        vitoria = y_c >  MAP_ALTURA - 100  
+        vitoria = y_c >  MAP_ALTURA - 300  
 
         # Lógica para contorlar po movimento da menina baseado em teclas precionadas e Translação
         teclas = pygame.key.get_pressed()
@@ -239,6 +238,9 @@ while True:
 
         # Controlador do tempo restante e exibição da HUD
         desenhar_hud(tela, tempo_restante, LARGURA)
+
+        # Desenhando onibus na tela
+        desenhar_onibus(tela, onibus_x - camera_x, onibus_y - camera_y, 3)
 
         # Condições de vitoria e derrota 
         if vitoria:
