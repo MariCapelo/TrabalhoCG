@@ -150,6 +150,64 @@ def textura_parede(tela,x,y,altura,largura,textura_offset_x=0,textura_offset_y=0
                     setPixel(tela, xx + 5, yy+3, cor_detalhes_ripa1)
 
 
+def textura_janela(tela, x, y, largura, altura):
+    #RGB
+    cor_ripa_janela  = (156,90, 60)
+    cor_borda_ripa_janela = (115, 38, 5)
+    cor_vidro = (200, 200, 255)
+    cor_ponto_reflexo=(255, 255, 255)
+   
+
+    #quantos pixels cada parte da janela ocupa
+    espessura_ripa = 4
+     #preenche/pinta o vidro da janela de azul,mas deixa espaço para as ripas/moldura
+    for yy in range(y+espessura_ripa, y + altura - espessura_ripa):
+        for xx in range(x+espessura_ripa, x + largura - espessura_ripa):
+            setPixel(tela, xx, yy, cor_vidro)
+
+    # Ripa do meio (vertical e horizontal) - Dados usados para usar o bresenham
+    # e desenhar a textura da ripa no meio 
+    meio_esq = x + espessura_ripa #começa 5 pixels depois da borda esquerda
+    meio_dir = x + largura - espessura_ripa - 1 #termina 5 pixels antes da borda direita
+    meio_cima = y + espessura_ripa #começa 5 pixels abaixo da borda superior
+    meio_base = y + altura - espessura_ripa - 1 #termina 5 pixels antes da borda inferior
+    
+    meio_x = (meio_esq + meio_dir) // 2  # meio_x é a posição X da ripa vertical do meio (centro)
+    meio_y = (meio_cima + meio_base) // 2 # meio_y é a posição Y da ripa horizontal do meio (centro)
+
+    # aumentei a largura da ripa para 4 pixels
+    # pois quando coloquei menos ficou desproporcional
+    for y_desloc in range(-1, 4):
+        bresenham(tela, meio_esq, meio_y + y_desloc, meio_dir, meio_y + y_desloc, cor_ripa_janela)
+        bresenham(tela, meio_x + y_desloc, meio_cima, meio_x + y_desloc, meio_base, cor_ripa_janela)
+       
+    #construção da moldura (bordas superior, inferior, esquerda, direita)
+    for xx in range(x, x + largura):
+        for dy in range(espessura_ripa):
+            setPixel(tela, xx, y + dy, cor_ripa_janela)  # topo
+            setPixel(tela, xx, y + altura - 1 - dy, cor_ripa_janela)  # baixo
+
+    for yy in range(y, y + altura):
+        for dx in range(espessura_ripa):
+            setPixel(tela, x + dx, yy, cor_ripa_janela)  # esquerda
+            setPixel(tela, x + largura - 1 - dx, yy, cor_ripa_janela)  # direita
+
+# Aqui acrescentei a borda escura por fora da moldura
+    for xx in range(x, x + largura):
+        setPixel(tela, xx, y, cor_borda_ripa_janela)
+        setPixel(tela, xx, y + altura - 1, cor_borda_ripa_janela)
+
+    for yy in range(y, y + altura):
+        setPixel(tela, x, yy, cor_borda_ripa_janela)
+        setPixel(tela, x + largura - 1, yy, cor_borda_ripa_janela)
+
+    # adicionei um 'reflexo' no canto superior esquerdo do vidro
+    # que tem 4px de largura e 4px de altura, para ficar mais visível
+    for dy in range(4):
+        for dx in range(8):
+            setPixel(tela, x + espessura_ripa + dx, y + espessura_ripa + dy, cor_ponto_reflexo)
+
+
 def desenhar_casa(tela, base_x, base_y, textura_offset_x=None, textura_offset_y=None):
 
     # Quando o main nao passa offsets, calcula usando a ancora fixa da casa no mundo.
@@ -221,3 +279,4 @@ def desenhar_casa(tela, base_x, base_y, textura_offset_x=None, textura_offset_y=
     base_x+60, base_y+70,
     (255,255,255)
 )
+    textura_janela(tela, base_x+30, base_y+30, 60, 40)
