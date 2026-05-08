@@ -29,6 +29,7 @@ def colide_com_mapa(mascara_colisao, mascara_hitbox, hitbox, origem_x, origem_y)
 # Configurações da tela
 LARGURA, ALTURA = 1000, 500
 tela = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption("Pegue o Onibus")
 
 # Configurações de mundo 
 MAP_LARGURA, MAP_ALTURA = 1000, 2000
