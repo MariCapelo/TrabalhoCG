@@ -1,20 +1,6 @@
 import pygame
-from render.renderizacao import setPixel
+from render.renderizacao import circulo_preenchido, desenhar_poligono, scanline
 from ui.dicionario import desenhar_texto
-
-def desenhar_modal(tela, x, y, largura, altura, cor_borda, cor_fundo):
-    for i in range(largura):
-        for j in range(altura):
-            setPixel(tela, x + i, y + j, cor_fundo)
-
-    for i in range(largura):
-        setPixel(tela, x + i, y, cor_borda)
-        setPixel(tela, x + i, y + altura - 1, cor_borda)
-
-    for j in range(altura):
-        setPixel(tela, x, y + j, cor_borda)
-        setPixel(tela, x + largura - 1, y + j, cor_borda)
-
 
 def largura_texto(texto, escala):
     return len(texto) * escala * 4
@@ -37,17 +23,27 @@ def desenhar_tela_vitoria(tela, largura, altura, tempo_vitoria):
 
     if alpha < 80:
         return
-
     x = largura // 2 - 220
     y = altura // 2 - 120
+    
+    PONTOS_MODAL_DOWN = [(250, 25), (750,25), (750, 475), (250, 475)]
+    PONTOS_MODAL_UP = [(270, 45), (730,45), (730, 455), (270, 455)]
 
-    desenhar_modal(tela, x+6, y+6, 440, 240, (0,0,0), (0,0,0))
-
-    desenhar_modal(tela, x, y, 440, 240, (255,255,255), (20,20,20))
-
-    centralizar_texto(tela, "YOU WON!", altura//2 - 80, largura, 6, (255,255,255))
-    centralizar_texto(tela, "YOU CAUGHT", altura//2 - 10, largura, 4, (80,255,120))
-    centralizar_texto(tela, "THE BUS!", altura//2 + 40, largura, 5, (80,255,120))
+    desenhar_poligono(tela, PONTOS_MODAL_DOWN, (130,29,218))
+    scanline(tela, PONTOS_MODAL_DOWN, (130,29,218))
+    desenhar_poligono(tela, PONTOS_MODAL_UP, (255,255,255))
+    scanline(tela, PONTOS_MODAL_UP, (255,255,255))
+    
+    circulo_preenchido(tela, (130,29,218), (250, 25), 20)
+    circulo_preenchido(tela, (130,29,218), (750, 25), 20)
+    circulo_preenchido(tela, (130,29,218), (250, 475), 20)
+    circulo_preenchido(tela, (130,29,218), (750, 475), 20)
+    
+    centralizar_texto(tela, ":)", altura//2 - 120, largura, 10, (130,29,218))
+    
+    centralizar_texto(tela, "PEGOU O ONIBUS!", altura//2 - 15, largura, 5, (130,29,218))
+    centralizar_texto(tela, "NO FIM SUA", altura//2 + 40, largura, 3, (66,159,43))
+    centralizar_texto(tela, "A CORRERIA VALEU APENA", altura//2 + 70, largura, 3, (66,159,43))
 
     piscar = (pygame.time.get_ticks() // 400) % 2
 
@@ -55,8 +51,8 @@ def desenhar_tela_vitoria(tela, largura, altura, tempo_vitoria):
         centralizar_texto(
             tela,
             "PRESS R TO MENU",
-            altura//2 + 100,
+            altura//2 + 150,
             largura,
             3,
-            (200,200,200)
+            (70,70,70)
         )
