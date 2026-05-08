@@ -40,7 +40,7 @@ LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha(
 mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
 pista = pygame.image.load('./sprites/pista2.png').convert_alpha()
 
-# Posição inicial da bonequinha esua escala de tamanho 
+# Posição inicial da bonequinha e sua escala de tamanho 
 x_c, y_c = 240, 205
 escala = 3
 mascara_colisao = pygame.mask.from_surface(mapa_colisao)
@@ -70,7 +70,7 @@ alternar = 0
 ultimo_passo_tocado = status['alternar']
 
 # Tempo total do jogo em segundos
-tempo_total = 1000
+tempo_total = 5
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
