@@ -40,6 +40,7 @@ LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha(
 mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
 pista = pygame.image.load('./sprites/pista2.png').convert_alpha()
 parada = pygame.image.load('./sprites/parada.png').convert_alpha()
+gatinho = pygame.image.load('./sprites/cat.png').convert_alpha()
 
 # Posição inicial da bonequinha e sua escala de tamanho 
 x_c, y_c = 240, 205
@@ -60,6 +61,10 @@ onibus_x = 300
 onibus_y = pista_y + 10
 parada_x = onibus_x + 80 * 3 + 20
 parada_y = 1580
+
+# Posição do gatinho perto da casa (em coordenadas de mundo)
+gatinho_x = 320
+gatinho_y = 150
 
 clock = pygame.time.Clock()
 
@@ -221,6 +226,9 @@ while True:
 
         # Desenhando a casa
         desenhar_casa(tela, 50 - camera_x, 100 - camera_y)
+
+        # Desenhando o gatinho perto da casa
+        tela.blit(gatinho, (gatinho_x - camera_x, gatinho_y - camera_y))
 
         # Desenhando a pista de chegada do onibus
         tela.blit(pista, (pista_x - camera_x, pista_y - camera_y))
