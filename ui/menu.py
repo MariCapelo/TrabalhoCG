@@ -1,3 +1,5 @@
+import math
+import pygame
 from render.renderizacao import setPixel, desenhar_poligono, scanline
 from ui.dicionario import desenhar_texto
 from render.transformacoes import (
@@ -6,6 +8,7 @@ from render.transformacoes import (
     multiplica_matrizes,
     aplicar_transformacao,
 )
+from entidades.temporizador import desenhar_temporizador
 
 CAIXINHA1_PONTOS = [(375, 250), (625, 250), (625, 300), (375, 300)]
 CAIXINHA2_PONTOS = [(375, 350), (625, 350), (625, 400), (375, 400)]
@@ -38,6 +41,10 @@ def desenhar_overlay_escuro(tela, largura, altura, intensidade=3):
 def desenhar_menu(tela, largura, altura, opcao_selecionada):
     desenhar_texto(tela, "PEGUE O ONIBUS", largura//2 - 285, 105, 10, (75,0,130))
     desenhar_texto(tela, "PEGUE O ONIBUS", largura//2 - 280, 100, 10, (255,105,180))
+    tempo_segundos = pygame.time.get_ticks() / 1000.0
+    voltas_por_segundo = 1 / 12
+    angulo_ponteiro = 2 * math.pi * voltas_por_segundo * tempo_segundos
+    desenhar_temporizador(tela, (largura//2 + 330, 132), 40, angulo_ponteiro)
     cor_start_palavra= (75,0,130)
     cor_start_caixa = (255,255,255)
     cor_sair_palavra = (75,0,130)

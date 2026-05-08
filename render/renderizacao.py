@@ -92,3 +92,17 @@ def circulo(superficie, cor, centro, raio):
     for y in range(raio + 1):
         x = round(math.sqrt(raio * raio - y * y))
         quatro_pontos(superficie, centro_x, centro_y, x, y, cor)
+
+def pontos_circulo(centro, raio, segmentos=72):
+    cx, cy = centro
+    pontos = []
+    for i in range(segmentos):
+        ang = 2 * math.pi * i / segmentos
+        x = int(cx + raio * math.cos(ang))
+        y = int(cy + raio * math.sin(ang))
+        pontos.append((x, y))
+    return pontos
+
+def circulo_preenchido(superficie, cor, centor, raio):
+    pontos = pontos_circulo(centor, raio)
+    scanline(superficie, pontos, cor)
