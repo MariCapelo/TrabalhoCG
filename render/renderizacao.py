@@ -1,4 +1,5 @@
 import pygame
+import math
 
 def setPixel(superficie, x, y, cor):
     if 0 <= x < superficie.get_width() and 0 <= y < superficie.get_height():
@@ -74,3 +75,20 @@ def scanline(tela, pontos, cor):
             if i + 1 < len(inter):
                 for x in range(inter[i], inter[i+1]):
                     setPixel(tela, x, y, cor)
+
+def quatro_pontos(superficie, centro_x, centro_y, x, y, cor):
+    setPixel(superficie, centro_x + x, centro_y + y, cor)
+    setPixel(superficie, centro_x - x, centro_y + y, cor)
+    setPixel(superficie, centro_x + x, centro_y - y, cor)
+    setPixel(superficie, centro_x - x, centro_y - y, cor)
+
+
+def circulo(superficie, cor, centro, raio):
+    centro_x, centro_y = centro
+    for x in range(raio + 1):
+        y = round(math.sqrt(raio * raio - x * x))
+        quatro_pontos(superficie, centro_x, centro_y, x, y, cor)
+
+    for y in range(raio + 1):
+        x = round(math.sqrt(raio * raio - y * y))
+        quatro_pontos(superficie, centro_x, centro_y, x, y, cor)
