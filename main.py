@@ -39,6 +39,7 @@ labirintoUp = pygame.image.load('./sprites/sprite-LabUp.png').convert_alpha()
 LabirintoDown = pygame.image.load('./sprites/sprite-LabDown.png').convert_alpha()
 mapa_colisao = pygame.image.load('./sprites/colisao_labirinto3.png').convert_alpha()
 pista = pygame.image.load('./sprites/pista2.png').convert_alpha()
+parada = pygame.image.load('./sprites/parada.png').convert_alpha()
 
 # Posição inicial da bonequinha e sua escala de tamanho 
 x_c, y_c = 240, 205
@@ -57,6 +58,8 @@ pista_x = (MAP_LARGURA - pista.get_width())
 pista_y = (MAP_ALTURA - pista.get_height()) # y = 1700
 onibus_x = 300
 onibus_y = pista_y + 10
+parada_x = onibus_x + 80 * 3 + 20
+parada_y = 1580
 
 clock = pygame.time.Clock()
 
@@ -70,7 +73,7 @@ alternar = 0
 ultimo_passo_tocado = status['alternar']
 
 # Tempo total do jogo em segundos
-tempo_total = 5
+tempo_total = 40
 tempo_inicial = pygame.time.get_ticks()
 tempo_game_over = 0  
 tempo_vitoria = 0
@@ -130,7 +133,7 @@ while True:
         derrota = tempo_restante == 0
 
         # vitória baseada na posição no mapa - ajeitar
-        vitoria = y_c >  MAP_ALTURA - 300  
+        vitoria = y_c >  MAP_ALTURA - 350  
 
         # Lógica para contorlar po movimento da menina baseado em teclas precionadas e Translação
         teclas = pygame.key.get_pressed()
@@ -238,6 +241,9 @@ while True:
 
         # Controlador do tempo restante e exibição da HUD
         desenhar_hud(tela, tempo_restante, LARGURA)
+
+        # Desenhando a parada à frente do ônibus
+        tela.blit(parada, (parada_x - camera_x, parada_y - camera_y))
 
         # Desenhando onibus na tela
         desenhar_onibus(tela, onibus_x - camera_x, onibus_y - camera_y, 3)
